@@ -1,8 +1,8 @@
 /html
-/htdocs/media/
-/htdocs/var/
-/htdocs/includes/src/
-/htdocs/app/etc/local.xml
+/media/
+/var/
+/includes/src/
+/app/etc/local.xml
 .sass-cache/
 .idea/
 .phpstorm.meta.php
@@ -10,6 +10,5 @@
 sitemap.xml
 *_sitemap.xml
 iworx-backup
-/htdocs/skin/frontend/rwd/*/.sass-cache/
-/htdocs/skin/frontend/rwd/*/css/*
-/var
+/skin/frontend/rwd/*/.sass-cache/
+/skin/frontend/rwd/*/css/*

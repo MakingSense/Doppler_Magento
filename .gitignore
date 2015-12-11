@@ -12,3 +12,4 @@ sitemap.xml
 iworx-backup
 /htdocs/skin/frontend/rwd/*/.sass-cache/
 /htdocs/skin/frontend/rwd/*/css/*
+/var

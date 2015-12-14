@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+		<menu>
+				<doppler translate="title" module="makingsense_doppler">
+						<title>Doppler</title>
+						<sort_order>65</sort_order>
+						<children>
+								<suscriptors translate="title" module="makingsense_doppler">
+										<title>Suscriptors</title>
+										<action>adminhtml/suscriptors</action>
+								</suscriptors>
+						</children>
+						<children>
+								<lead_mapping translate="title" module="makingsense_doppler">
+										<title>Lead Mapping</title>
+										<action>adminhtml/leadmap</action>
+								</lead_mapping>
+						</children>
+				</doppler>
+		</menu>
+		<acl>
+				<resources>
+						<admin>
+								<children>
+										<system>
+												<children>
+														<config>
+																<children>
+																		<doppler translate="title" module="makingsense_doppler">
+																				<title>Doppler API</title>
+																		</doppler>
+																</children>
+														</config>
+												</children>
+										</system>
+								</children>
+						</admin>
+				</resources>
+		</acl>
+</config>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <MakingSense_Doppler>
+            <active>true</active>
+            <codePool>local</codePool>
+        </MakingSense_Doppler>
+    </modules>
+</config>

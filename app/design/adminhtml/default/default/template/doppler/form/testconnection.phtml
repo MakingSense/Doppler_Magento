@@ -1,0 +1,66 @@
+<?php
+/**
+* aheadWorks Co.
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://ecommerce.aheadworks.com/AW-LICENSE.txt
+ *
+ * =================================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * =================================================================
+ * This package designed for Magento ENTERPRISE edition
+ * aheadWorks does not guarantee correct work of this extension
+ * on any other Magento edition except Magento ENTERPRISE edition.
+ * aheadWorks does not provide extension support in case of
+ * incorrect edition usage.
+ * =================================================================
+ *
+ * @category   AW
+ * @package    AW_Advancedsearch
+ * @version    1.3.0
+ * @copyright  Copyright (c) 2010-2012 aheadWorks Co. (http://www.aheadworks.com)
+ * @license    http://ecommerce.aheadworks.com/AW-LICENSE.txt
+ */
+?>
+<div id="test_connection_container">
+    <div>
+        <button onclick="testConnection();" class="scalable" type="button" id="test_gateway_connection">
+            <span>
+                <?php echo $this->__('Test connection'); ?>
+            </span>
+        </button>
+        &nbsp;<span id="script_answer"></span>
+
+        <script type="text/javascript">
+
+            function testConnection() {
+
+                // Doppler (GET https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists)
+                jQuery.ajax({
+                    url: "https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists",
+                    type: "GET",
+                    headers: {
+                        "Authorization": "token 75D1DFD190CDC50AE95EAEAAB661F949"
+                    }
+                }).done(function(data, textStatus, jqXHR) {
+                    console.log("HTTP Request Succeeded: " + jqXHR.status);
+                    console.log(data);
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.log("HTTP Request Failed");
+                    console.log(errorThrown);
+                })
+                .always(function() {
+                    /* ... */
+                });
+
+            }
+
+        </script>
+
+    </div>
+</div>

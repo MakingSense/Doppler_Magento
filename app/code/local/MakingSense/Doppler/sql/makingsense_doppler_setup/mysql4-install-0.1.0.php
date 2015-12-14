@@ -4,9 +4,9 @@ $installer = $this;
 
 $installer->startSetup();
 
-if (!$installer->tableExists($installer->getTable('makingsense_doppler/doppler_suscriptors'))) {
+if (!$installer->tableExists($installer->getTable('makingsense_doppler/doppler_subscribers'))) {
 	$installer->run("
-		CREATE TABLE `{$installer->getTable('makingsense_doppler/doppler_suscriptors')}` (
+		CREATE TABLE `{$installer->getTable('makingsense_doppler/doppler_subscribers')}` (
 		  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 		  `name` varchar(255) DEFAULT NULL,
 		  PRIMARY KEY (`id`)

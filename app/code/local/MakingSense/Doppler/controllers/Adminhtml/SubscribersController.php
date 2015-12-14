@@ -1,16 +1,16 @@
 <?php
 
-class MakingSense_Doppler_Adminhtml_SuscriptorsController extends Mage_Adminhtml_Controller_Action {
+class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml_Controller_Action {
 	protected function initAction (){
 		$this->loadLayout()
-			 ->_setActiveMenu('makingsense_doppler/suscriptors');
+			 ->_setActiveMenu('makingsense_doppler/subscribers');
 		
 		return $this;
 	}
 	
 	public function indexAction (){
 		$this->initAction()
-			 ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_suscriptors'))
+			 ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_subscribers'))
 			 ->renderLayout();
 	}
 	
@@ -21,21 +21,21 @@ class MakingSense_Doppler_Adminhtml_SuscriptorsController extends Mage_Adminhtml
 	public function editAction (){
 		$id = $this->getRequest()->getParam('id');
 		
-		$model = Mage::getModel('makingsense_doppler/suscriptors');
+		$model = Mage::getModel('makingsense_doppler/subscribers');
 		if ($id){
 			$model->load($id);
 			
 			if (!$model->getId()){
-				$this->_getSession()->addError($this->__('Suscriptors does not exist'));
+				$this->_getSession()->addError($this->__('Subscribers does not exist'));
 				$this->_redirect('*/*/');
 				return;
 			}
 		}
 		
-		Mage::register('suscriptors_data', $model);
+		Mage::register('subscribers_data', $model);
 		
 		$this->initAction()
-			 ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_suscriptors_edit'))
+			 ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_subscribers_edit'))
 			 ->renderLayout();
 	}
 	
@@ -43,15 +43,15 @@ class MakingSense_Doppler_Adminhtml_SuscriptorsController extends Mage_Adminhtml
 		$id = $this->getRequest()->getParam('id');
 		if ($id){
 			try {
-				$model = Mage::getModel('makingsense_doppler/suscriptors')->load($id);
+				$model = Mage::getModel('makingsense_doppler/subscribers')->load($id);
 				if (!$model->getId()){
-					$this->_getSession()->addError("Suscriptors $id does not exist");
+					$this->_getSession()->addError("Subscribers $id does not exist");
 					$this->_redirect("*/*/");
 					return;
 				}
 				
 				$model->delete();
-				$this->_getSession()->addSuccess($this->__('Suscriptors deleted.'));
+				$this->_getSession()->addSuccess($this->__('Subscribers deleted.'));
 			} catch (Exception $e){
 				$this->_getSession()->addError($e->getMessage());
 			}
@@ -65,7 +65,7 @@ class MakingSense_Doppler_Adminhtml_SuscriptorsController extends Mage_Adminhtml
 		
 		if ($data){
 			try {
-				$model = Mage::getModel('makingsense_doppler/suscriptors');
+				$model = Mage::getModel('makingsense_doppler/subscribers');
 				$model->setData($data);
 				$model->save();
 				
@@ -79,7 +79,7 @@ class MakingSense_Doppler_Adminhtml_SuscriptorsController extends Mage_Adminhtml
 	}
 	
 	public function massDeleteAction (){
-		$data = $this->getRequest()->getParam('suscriptors');
+		$data = $this->getRequest()->getParam('subscribers');
 		if (!is_array($data)){
 			$this->_getSession()->addError(
 				$this->__("Please select at least one record")
@@ -87,8 +87,8 @@ class MakingSense_Doppler_Adminhtml_SuscriptorsController extends Mage_Adminhtml
 		} else {
 			try {
 				foreach ($data as $id){
-					$suscriptors = Mage::getModel('makingsense_doppler/suscriptors')->load($id);
-					$suscriptors->delete();
+					$subscribers = Mage::getModel('makingsense_doppler/subscribers')->load($id);
+					$subscribers->delete();
 				}
 				
 				$this->_getSession()->addSuccess(

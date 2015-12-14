@@ -19,7 +19,11 @@ class MakingSense_Doppler_Block_Adminhtml_Leadmap_Grid extends Mage_Adminhtml_Bl
 	
 	protected function _prepareColumns (){
 		$this->addColumn('name', array(
-			'header' => Mage::helper('makingsense_doppler')->__('Name'),
+			'header' => Mage::helper('makingsense_doppler')->__('Doppler'),
+			'index' => 'name'
+		));
+		$this->addColumn('name', array(
+			'header' => Mage::helper('makingsense_doppler')->__('Customers/Subscribers'),
 			'index' => 'name'
 		));
 	}

@@ -1,8 +1,8 @@
 <?php
 
-class MakingSense_Doppler_Block_Adminhtml_Suscriptors_Edit_Form extends Mage_Adminhtml_Block_Widget_Form {
+class MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit_Form extends Mage_Adminhtml_Block_Widget_Form {
 	protected function _prepareForm (){
-		$model = Mage::registry('suscriptors_data');
+		$model = Mage::registry('subscribers_data');
 		
 		$form = new Varien_Data_Form(array(
 			'id' => 'edit_form',
@@ -10,8 +10,8 @@ class MakingSense_Doppler_Block_Adminhtml_Suscriptors_Edit_Form extends Mage_Adm
 			'method' => 'post'
 		));
 		
-        $fieldset = $form->addFieldset('suscriptors_form', array(
-			'legend' => Mage::helper('makingsense_doppler')->__('Suscriptors information')
+        $fieldset = $form->addFieldset('subscribers_form', array(
+			'legend' => Mage::helper('makingsense_doppler')->__('Subscribers information')
 		));
 		
 		$fieldset->addField('name', 'text', array(

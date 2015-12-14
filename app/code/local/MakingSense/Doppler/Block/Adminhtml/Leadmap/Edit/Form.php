@@ -1,6 +1,7 @@
 <?php
 
 class MakingSense_Doppler_Block_Adminhtml_Leadmap_Edit_Form extends Mage_Adminhtml_Block_Widget_Form {
+
 	protected function _prepareForm (){
 		$model = Mage::registry('leadmap_data');
 		
@@ -14,11 +15,21 @@ class MakingSense_Doppler_Block_Adminhtml_Leadmap_Edit_Form extends Mage_Adminht
 			'legend' => Mage::helper('makingsense_doppler')->__('Leadmap information')
 		));
 		
-		$fieldset->addField('name', 'text', array(
-			'label'     => Mage::helper('makingsense_doppler')->__('Name'),
+		$fieldset->addField('doppler_field_name', 'text', array(
+			'label'     => Mage::helper('makingsense_doppler')->__('Doppler Field Name'),
 			'class'     => 'required-entry',
 			'required'  => true,
-			'name'      => 'name',
+			'name'      => 'doppler_field_name',
+		));
+
+		$magentoAttributes = $this->getCustomerAttributes();
+
+		$fieldset->addField('magento_field_name', 'select', array(
+			'label'     => Mage::helper('makingsense_doppler')->__('Magento Field Name'),
+			'class'     => 'required-entry',
+			'required'  => true,
+			'name'      => 'magento_field_name',
+			'values' => $magentoAttributes,
 		));
 		
 		if ($model->getId()){
@@ -32,5 +43,17 @@ class MakingSense_Doppler_Block_Adminhtml_Leadmap_Edit_Form extends Mage_Adminht
 		$this->setForm($form);
 		
 		return parent::_prepareForm();
+	}
+
+	public function getCustomerAttributes()
+	{
+		$attributes = Mage::getModel('customer/entity_attribute_collection')
+			->addVisibleFilter();
+		$result = array();
+		foreach ($attributes as $attribute) {
+			if (($label = $attribute->getName()))
+				$result[$attribute->getName()] = $label;
+		}
+		return $result;
 	}
 }

@@ -8,7 +8,8 @@ if (!$installer->tableExists($installer->getTable('makingsense_doppler/doppler_l
 	$installer->run("
 		CREATE TABLE `{$installer->getTable('makingsense_doppler/doppler_leadmap')}` (
 		  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-		  `name` varchar(255) DEFAULT NULL,
+		  `doppler_field_name` varchar(255) DEFAULT NULL,
+		  `magento_field_name` varchar(255) DEFAULT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 	");

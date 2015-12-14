@@ -1,6 +1,7 @@
 <?php
 
 class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Controller_Action {
+
     protected function initAction (){
         $this->loadLayout()
             ->_setActiveMenu('makingsense_doppler/leadmap');
@@ -61,7 +62,10 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
     }
 
     public function saveAction (){
+
         $data = $this->getRequest()->getPost();
+
+        Mage::log($data, null,'save-data.log');
 
         if ($data){
             try {

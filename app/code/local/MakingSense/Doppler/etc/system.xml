@@ -21,6 +21,8 @@
                         <username translate="label">
                             <label>Username / Usuario</label>
                             <frontend_type>text</frontend_type>
+                            <validate>validate-email</validate>
+                            <comment>This is your Doppler email address.</comment>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -29,6 +31,7 @@
                         <key translate="label">
                             <label>API key</label>
                             <frontend_type>text</frontend_type>
+                            <validate>validate-alphanum</validate>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

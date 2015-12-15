@@ -26,41 +26,17 @@
  * @license    http://ecommerce.aheadworks.com/AW-LICENSE.txt
  */
 ?>
+
 <div id="test_connection_container">
     <div>
-        <button onclick="testConnection();" class="scalable" type="button" id="test_gateway_connection">
-            <span>
-                <?php echo $this->__('Test connection'); ?>
-            </span>
-        </button>
-        &nbsp;<span id="script_answer"></span>
-
-        <script type="text/javascript">
-
-            function testConnection() {
-
-                // Doppler (GET https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists)
-                jQuery.ajax({
-                    url: "https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists",
-                    type: "GET",
-                    headers: {
-                        "Authorization": "token 75D1DFD190CDC50AE95EAEAAB661F949"
-                    }
-                }).done(function(data, textStatus, jqXHR) {
-                    console.log("HTTP Request Succeeded: " + jqXHR.status);
-                    console.log(data);
-                })
-                .fail(function(jqXHR, textStatus, errorThrown) {
-                    console.log("HTTP Request Failed");
-                    console.log(errorThrown);
-                })
-                .always(function() {
-                    /* ... */
-                });
-
-            }
-
-        </script>
-
+        <?php if ($_statusCode = $this->getStatusCode()): ?>
+            <?php if ($_statusCode == '200'): ?>
+                <div style="color: green; font-weight: bold;"><?php echo $this->__('Connection successfully established') ?></div>
+            <?php else: ?>
+                <div style="color: red; font-weight: bold;"><?php echo $this->__('Your credentials are not valid, please check your username and API key and try again') ?></div>
+            <?php endif ?>
+        <?php else: ?>
+            <div><?php echo $this->__('Please, add your credentials above and save this page to test your API connection') ?></div>
+        <?php endif ?>
     </div>
 </div>

@@ -35,9 +35,6 @@
 			<makingsense_doppler_resource>
 				<class>MakingSense_Doppler_Model_Resource</class>
 				<entities>
-					<doppler_subscribers>
-						<table>doppler_subscribers</table>
-					</doppler_subscribers>
 					<doppler_leadmap>
 						<table>doppler_leadmap</table>
 					</doppler_leadmap>

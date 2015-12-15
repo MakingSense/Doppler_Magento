@@ -1,4 +1,0 @@
-<?php
-
-class MakingSense_Doppler_Model_Resource_Doppler_Subscribers_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract {
-}

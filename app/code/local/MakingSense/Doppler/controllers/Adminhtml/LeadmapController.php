@@ -65,15 +65,33 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
 
         $data = $this->getRequest()->getPost();
 
-        Mage::log($data, null,'save-data.log');
-
         if ($data){
             try {
-                $model = Mage::getModel('makingsense_doppler/leadmap');
-                $model->setData($data);
-                $model->save();
+                // Validate that there is no attribute already associated with this Doppler field
+                $fieldAlreadyExist = false;
 
-                $this->_getSession()->addSuccess($this->__('Saved.'));
+                $mappedFields = Mage::getModel('makingsense_doppler/leadmap')->getCollection()->getData();
+
+                foreach ($mappedFields as $field) {
+                    $dopplerFieldName = $field['doppler_field_name'];
+
+                    $savedDopplerFieldName = $data['doppler_field_name'];
+
+                    if ($dopplerFieldName == $savedDopplerFieldName) {
+                        $fieldAlreadyExist = true;
+                    }
+                }
+
+                if (!$fieldAlreadyExist) {
+                    $model = Mage::getModel('makingsense_doppler/leadmap');
+                    $model->setData($data);
+                    $model->save();
+
+                    $this->_getSession()->addSuccess($this->__('Saved.'));
+                } else {
+                    $this->_getSession()->addError($this->__('There is already a Magento attribute associated with the following Doppler field: ' . $savedDopplerFieldName));
+                }
+
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());
             }

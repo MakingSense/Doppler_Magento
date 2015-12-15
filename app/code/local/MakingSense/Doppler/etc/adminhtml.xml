@@ -5,10 +5,18 @@
 						<title>Doppler</title>
 						<sort_order>65</sort_order>
 						<children>
+								<subscribers translate="title" module="makingsense_doppler">
+										<title>Subscribers</title>
+										<action>adminhtml/subscribers</action>
+								</subscribers>
 								<lead_mapping translate="title" module="makingsense_doppler">
 										<title>Lead Mapping</title>
 										<action>adminhtml/leadmap</action>
 								</lead_mapping>
+								<doppler_lists translate="title" module="makingsense_doppler">
+										<title>Doppler Lists</title>
+										<action>adminhtml/lists</action>
+								</doppler_lists>
 						</children>
 				</doppler>
 		</menu>

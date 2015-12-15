@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<MakingSense_Doppler>
-			<version>0.1.2</version>
+			<version>0.1.3</version>
 		</MakingSense_Doppler>
 	</modules>
 	<admin>
@@ -38,6 +38,12 @@
 					<doppler_leadmap>
 						<table>doppler_leadmap</table>
 					</doppler_leadmap>
+					<doppler_subscribers>
+						<table>doppler_subscribers</table>
+					</doppler_subscribers>
+					<doppler_lists>
+						<table>doppler_lists</table>
+					</doppler_lists>
 				</entities>
 			</makingsense_doppler_resource>
 		</models>

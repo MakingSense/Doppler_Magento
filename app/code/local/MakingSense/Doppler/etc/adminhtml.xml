@@ -17,6 +17,10 @@
 										<title>Doppler Lists</title>
 										<action>adminhtml/lists</action>
 								</doppler_lists>
+								<doppler_sync translate="title" module="makingsense_doppler">
+										<title>Sync</title>
+										<action>adminhtml/sync</action>
+								</doppler_sync>
 						</children>
 				</doppler>
 		</menu>

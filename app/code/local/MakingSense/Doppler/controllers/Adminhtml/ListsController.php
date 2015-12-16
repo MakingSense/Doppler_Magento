@@ -61,36 +61,63 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
         $this->_redirect("*/*/");
     }
 
-    public function saveAction (){
+    public function saveAction()
+    {
 
         $data = $this->getRequest()->getPost();
 
-        if ($data){
+        if ($data)
+        {
             try {
-                // Validate that there is no attribute already associated with this Doppler field
-                $fieldAlreadyExist = false;
+                // Get cURL resource
+                $ch = curl_init();
 
-                $mappedFields = Mage::getModel('makingsense_doppler/lists')->getCollection()->getData();
+                // Set url
+                curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists');
 
-                foreach ($mappedFields as $field) {
-                    $dopplerFieldName = $field['doppler_field_name'];
+                // Set method
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 
-                    $savedDopplerFieldName = $data['doppler_field_name'];
+                // Set options
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-                    if ($dopplerFieldName == $savedDopplerFieldName) {
-                        $fieldAlreadyExist = true;
+                // Set headers
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
+                    ]
+                );
+
+                // Create body
+                $body = '{ name: "' . $data['name'] . '" }';
+
+                Mage::log($body, null,'body.log');
+
+                // Set body
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+
+                // Send the request & save response to $resp
+                $resp = curl_exec($ch);
+
+                if(!$resp) {
+                    Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                } else {
+
+                    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                    Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                    Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
+
+                    if ($statusCode == '201') {
+                        $this->_getSession()->addSuccess($this->__('The list has been sucessfully created.'));
+                    } else {
+                        $responseContent = json_decode($resp, true);
+                        $this->_getSession()->addError($this->__('The following errors ocurred creating your list: ' . $responseContent['title']));
                     }
                 }
 
-                if (!$fieldAlreadyExist) {
-                    $model = Mage::getModel('makingsense_doppler/lists');
-                    $model->setData($data);
-                    $model->save();
-
-                    $this->_getSession()->addSuccess($this->__('Saved.'));
-                } else {
-                    $this->_getSession()->addError($this->__('There is already a Magento attribute associated with the following Doppler field: ' . $savedDopplerFieldName));
-                }
+                // Close request to clear up some resources
+                curl_close($ch);
 
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());

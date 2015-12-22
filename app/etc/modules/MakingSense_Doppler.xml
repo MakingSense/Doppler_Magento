@@ -4,6 +4,10 @@
         <MakingSense_Doppler>
             <active>true</active>
             <codePool>local</codePool>
+            <depends>
+                <Mage_Customer />
+                <Mage_Adminhtml />
+            </depends>
         </MakingSense_Doppler>
     </modules>
 </config>

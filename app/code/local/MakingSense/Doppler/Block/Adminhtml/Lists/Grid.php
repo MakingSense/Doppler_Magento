@@ -24,9 +24,9 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Grid extends Mage_Adminhtml_Bloc
 			'header' => Mage::helper('makingsense_doppler')->__('List Name'),
 			'index' => 'name'
 		));
-		$this->addColumn('last_usage', array(
-			'header' => Mage::helper('makingsense_doppler')->__('Last Usage'),
-			'index' => 'last_usage'
+		$this->addColumn('creation_date', array(
+			'header' => Mage::helper('makingsense_doppler')->__('Creation Date'),
+			'index' => 'creation_date'
 		));
 	}
 	

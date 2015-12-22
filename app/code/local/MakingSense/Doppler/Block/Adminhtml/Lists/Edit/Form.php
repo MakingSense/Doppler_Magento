@@ -18,6 +18,12 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 			'legend' => Mage::helper('makingsense_doppler')->__('List information')
 		));
 
+		$fieldset->addField('list_id', 'hidden', array(
+			'label'     => Mage::helper('makingsense_doppler')->__('List ID'),
+			'required'  => false,
+			'name'      => 'list_id',
+		));
+
 		$fieldset->addField('name', 'text', array(
 			'label'     => Mage::helper('makingsense_doppler')->__('Name'),
 			'class'     => 'required-entry',
@@ -25,11 +31,16 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 			'name'      => 'name',
 		));
 
-		$fieldset->addField('last_usage', 'label', array(
-			'label'     => Mage::helper('makingsense_doppler')->__('Last Usage'),
-			'class'     => 'required-entry',
-			'required'  => true,
-			'name'      => 'last_usage',
+		$fieldset->addField('creation_date', 'hidden', array(
+			'label'     => Mage::helper('makingsense_doppler')->__('Creation Date'),
+			'required'  => false,
+			'name'      => 'creation_date',
+		));
+
+		$fieldset->addField('subscribers_count', 'hidden', array(
+			'label'     => Mage::helper('makingsense_doppler')->__('Subscribers Count'),
+			'required'  => false,
+			'name'      => 'subscribers_count',
 		));
 
 		if ($model->getId()){

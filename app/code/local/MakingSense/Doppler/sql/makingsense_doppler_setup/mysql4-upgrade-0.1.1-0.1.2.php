@@ -9,10 +9,11 @@
     $installer->addAttribute('customer', 'doppler_synced', array(
         'input'         => 'boolean',
         'type'          => 'int',
-        'label'         => 'Synced in Doppler',
+        'label'         => 'Synced with Doppler',
         'visible'       => 1,
         'required'      => 0,
         'user_defined' => 0,
+        'default'      => 0
     ));
 
     $installer->addAttributeToGroup(

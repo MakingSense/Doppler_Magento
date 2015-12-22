@@ -14,7 +14,6 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
         if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
             Mage::getSingleton('core/session')->addError($this->__('The Doppler API is not currently available, please try later'));
         } else {
-
             // Get cURL resource
             $ch = curl_init();
 
@@ -49,12 +48,21 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
 
                 if ($statusCode == '200') {
 
-                    $fieldsResponseArray = $responseContent['items'];
-
                     $model = Mage::getModel('makingsense_doppler/lists');
 
-                    foreach ($fieldsResponseArray as $field) {
+                    // First, remove the old Doppler lists
+                    foreach ($model->getCollection() as $list) {
+                        $model->load($list->getId())->delete();
+                    }
+
+                    // Then, store all list from latest API call
+
+                    $fieldsResponseArray = $responseContent['items'];
+
+                    foreach ($fieldsResponseArray as $field)
+                    {
                         $data = array();
+
 
                         $data['name'] = $field['name'];
                         $data['list_id'] = $field['listId'];
@@ -129,7 +137,6 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
 
     public function saveAction()
     {
-
         $data = $this->getRequest()->getPost();
 
         if ($data)
@@ -150,6 +157,7 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                 // Set headers
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                         "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
+                        "Content-Type: text/xml",
                     ]
                 );
 

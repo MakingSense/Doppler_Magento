@@ -37,6 +37,11 @@
 						<makingsense_doppler>
 								<class>MakingSense_Doppler_Block</class>
 						</makingsense_doppler>
+						<adminhtml>
+								<rewrite>
+										<customer_grid>MakingSense_Doppler_Block_Adminhtml_Customer_Grid</customer_grid>
+								</rewrite>
+						</adminhtml>
 				</blocks>
 				<models>
 						<makingsense_doppler>

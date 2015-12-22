@@ -6,21 +6,21 @@
 						<sort_order>65</sort_order>
 						<children>
 								<subscribers translate="title" module="makingsense_doppler">
-										<title>Subscribers</title>
+										<title>Magento Subscribers</title>
 										<action>adminhtml/subscribers</action>
 								</subscribers>
-								<lead_mapping translate="title" module="makingsense_doppler">
-										<title>Lead Mapping</title>
-										<action>adminhtml/leadmap</action>
-								</lead_mapping>
 								<doppler_lists translate="title" module="makingsense_doppler">
 										<title>Doppler Lists</title>
 										<action>adminhtml/lists</action>
 								</doppler_lists>
-								<doppler_sync translate="title" module="makingsense_doppler">
-										<title>Sync</title>
-										<action>adminhtml/sync</action>
-								</doppler_sync>
+								<lead_mapping translate="title" module="makingsense_doppler">
+										<title>Lead Mapping</title>
+										<action>adminhtml/leadmap</action>
+								</lead_mapping>
+								<api_connection translate="title" module="makingsense_doppler">
+										<title>API Connection</title>
+										<action>adminhtml/system_config/edit/section/doppler</action>
+								</api_connection>
 						</children>
 				</doppler>
 		</menu>

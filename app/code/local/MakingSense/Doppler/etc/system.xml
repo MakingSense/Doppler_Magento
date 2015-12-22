@@ -19,7 +19,7 @@
                     <show_in_store>1</show_in_store>
                     <fields>
                         <username translate="label">
-                            <label>Username / Usuario</label>
+                            <label>Username</label>
                             <frontend_type>text</frontend_type>
                             <validate>validate-email</validate>
                             <comment>This is your Doppler email address.</comment>

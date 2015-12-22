@@ -10,6 +10,7 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
     }
 
     public function indexAction (){
+
         $this->initAction()
             ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_leadmap'))
             ->renderLayout();
@@ -20,24 +21,35 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
     }
 
     public function editAction (){
-        $id = $this->getRequest()->getParam('id');
 
-        $model = Mage::getModel('makingsense_doppler/leadmap');
-        if ($id){
-            $model->load($id);
+        if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
+            Mage::getSingleton('core/session')->addError($this->__('The Doppler API is not currently available, please try later'));
 
-            if (!$model->getId()){
-                $this->_getSession()->addError($this->__('leadmap does not exist'));
-                $this->_redirect('*/*/');
-                return;
+            $this->initAction()
+                ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_leadmap_edit'))
+                ->renderLayout();
+        } else {
+
+            $id = $this->getRequest()->getParam('id');
+
+            $model = Mage::getModel('makingsense_doppler/leadmap');
+            if ($id){
+                $model->load($id);
+
+                if (!$model->getId()){
+                    $this->_getSession()->addError($this->__('Mapping does not exist'));
+                    $this->_redirect('*/*/');
+                    return;
+                }
             }
+
+            Mage::register('leadmap_data', $model);
+
+            $this->initAction()
+                ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_leadmap_edit'))
+                ->renderLayout();
         }
 
-        Mage::register('leadmap_data', $model);
-
-        $this->initAction()
-            ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_leadmap_edit'))
-            ->renderLayout();
     }
 
     public function deleteAction (){
@@ -46,13 +58,13 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
             try {
                 $model = Mage::getModel('makingsense_doppler/leadmap')->load($id);
                 if (!$model->getId()){
-                    $this->_getSession()->addError("leadmap $id does not exist");
+                    $this->_getSession()->addError("Leadmap with id '%s' does not exist", $id);
                     $this->_redirect("*/*/");
                     return;
                 }
 
                 $model->delete();
-                $this->_getSession()->addSuccess($this->__('leadmap deleted.'));
+                $this->_getSession()->addSuccess($this->__('Leadmap deleted'));
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());
             }
@@ -72,6 +84,8 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
 
                 $mappedFields = Mage::getModel('makingsense_doppler/leadmap')->getCollection()->getData();
 
+                $savedDopplerFieldName = '';
+
                 foreach ($mappedFields as $field) {
                     $dopplerFieldName = $field['doppler_field_name'];
 
@@ -89,7 +103,7 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
 
                     $this->_getSession()->addSuccess($this->__('Saved.'));
                 } else {
-                    $this->_getSession()->addError($this->__('There is already a Magento attribute associated with the following Doppler field: ' . $savedDopplerFieldName));
+                    $this->_getSession()->addError($this->__('There is already a Magento attribute associated with the following Doppler field: %s', $savedDopplerFieldName));
                 }
 
             } catch (Exception $e){
@@ -114,7 +128,7 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
                 }
 
                 $this->_getSession()->addSuccess(
-                    $this->__('Total of %d record(s) have been deleted.', count($data))
+                    $this->__('Total of %d record(s) have been deleted', count($data))
                 );
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());

@@ -10,6 +10,72 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
     }
 
     public function indexAction (){
+
+        if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
+            Mage::getSingleton('core/session')->addError($this->__('The Doppler API is not currently available, please try later'));
+        } else {
+
+            // Get cURL resource
+            $ch = curl_init();
+
+            // Set url
+            curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists');
+
+            // Set method
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+            // Set options
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            // Set headers
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
+                ]
+            );
+
+            // Send the request & save response to $resp
+            $resp = curl_exec($ch);
+
+            if(!$resp) {
+                Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+            } else {
+
+                $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
+
+                $responseContent = json_decode($resp, true);
+
+                if ($statusCode == '200') {
+
+                    $fieldsResponseArray = $responseContent['items'];
+
+                    $model = Mage::getModel('makingsense_doppler/lists');
+
+                    foreach ($fieldsResponseArray as $field) {
+                        $data = array();
+
+                        $data['name'] = $field['name'];
+                        $data['list_id'] = $field['listId'];
+                        $data['status'] = $field['currentStatus'];
+                        $data['subscribers_count'] = $field['subscribersCount'];
+                        $data['creation_date'] = $field['creationDate'];
+
+                        $model->setData($data);
+                        $model->save();
+                    }
+
+                    $this->_getSession()->addSuccess($this->__('The lists have been sucessfully synced'));
+                } else {
+                    $this->_getSession()->addError($this->__('The following errors ocurred creating your list: %s', $responseContent['title']));
+                }
+            }
+
+            // Close request to clear up some resources
+            curl_close($ch);
+        }
+
         $this->initAction()
             ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_lists'))
             ->renderLayout();
@@ -46,13 +112,13 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
             try {
                 $model = Mage::getModel('makingsense_doppler/lists')->load($id);
                 if (!$model->getId()){
-                    $this->_getSession()->addError("List $id does not exist");
+                    $this->_getSession()->addError("List %s does not exist", $id);
                     $this->_redirect("*/*/");
                     return;
                 }
 
                 $model->delete();
-                $this->_getSession()->addSuccess($this->__('List deleted.'));
+                $this->_getSession()->addSuccess($this->__('List deleted'));
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());
             }
@@ -141,7 +207,7 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                 }
 
                 $this->_getSession()->addSuccess(
-                    $this->__('Total of %d record(s) have been deleted.', count($data))
+                    $this->__('Total of %d record(s) have been deleted', count($data))
                 );
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());

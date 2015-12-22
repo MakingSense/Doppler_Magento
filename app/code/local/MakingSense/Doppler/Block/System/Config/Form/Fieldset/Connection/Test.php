@@ -20,40 +20,44 @@
 
             if($usernameValue != '' && $apiKeyValue != '') {
 
-                // Get cURL resource
-                $ch = curl_init();
+                if (Mage::helper('makingsense_doppler')->testAPIConnection()) {
+                    // Get cURL resource
+                    $ch = curl_init();
 
-                // Set url
-                curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue);
+                    // Set url
+                    curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue);
 
-                // Set method
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+                    // Set method
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
 
-                // Set options
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    // Set options
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-                // Set headers
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        "Authorization: token " . $apiKeyValue,
-                    ]
-                );
+                    // Set headers
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "Authorization: token " . $apiKeyValue,
+                        ]
+                    );
 
-                // Send the request & save response to $resp
-                $resp = curl_exec($ch);
+                    // Send the request & save response to $resp
+                    $resp = curl_exec($ch);
 
-                if(!$resp) {
-                    Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                    if(!$resp) {
+                        Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                    } else {
+
+                        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                        $block->setStatusCode($statusCode);
+
+                        Mage::log("Response HTTP Status Code : " . $statusCode, null,'doppler.log');
+                        Mage::log("Response HTTP Body : " . $resp, null,'doppler.log');
+                    }
+
+                    // Close request to clear up some resources
+                    curl_close($ch);
                 } else {
-
-                    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    $block->setStatusCode($statusCode);
-
-                    Mage::log("Response HTTP Status Code : " . $statusCode, null,'doppler.log');
-                    Mage::log("Response HTTP Body : " . $resp, null,'doppler.log');
+                    $block->setStatusCode('404');
                 }
-
-                // Close request to clear up some resources
-                curl_close($ch);
 
             }
 

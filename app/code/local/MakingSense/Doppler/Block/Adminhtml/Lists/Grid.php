@@ -12,6 +12,7 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Grid extends Mage_Adminhtml_Bloc
 	}
 	
     protected function _prepareCollection (){
+
 		$collection = Mage::getModel('makingsense_doppler/lists')->getCollection();
 		$this->setCollection($collection);
 		

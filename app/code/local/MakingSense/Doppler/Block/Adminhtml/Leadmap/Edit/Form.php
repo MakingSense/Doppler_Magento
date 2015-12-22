@@ -6,7 +6,11 @@ class MakingSense_Doppler_Block_Adminhtml_Leadmap_Edit_Form extends Mage_Adminht
 
 	protected function _prepareForm (){
 		$model = Mage::registry('leadmap_data');
-		
+
+		if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
+			return parent::_prepareForm();
+		}
+
 		$form = new Varien_Data_Form(array(
 			'id' => 'edit_form',
 			'action' => $this->getUrl("*/*/save", array('id' => $this->getRequest()->getParam('id'))),

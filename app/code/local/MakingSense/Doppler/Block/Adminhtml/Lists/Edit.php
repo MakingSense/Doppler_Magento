@@ -10,7 +10,7 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit extends Mage_Adminhtml_Bloc
 	}
 	
 	public function getHeaderText (){
-		return $this->__('Lists');
+			return $this->__('Lists');
 	}
 
 }

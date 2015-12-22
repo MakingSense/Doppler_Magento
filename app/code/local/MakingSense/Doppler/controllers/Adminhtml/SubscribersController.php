@@ -69,7 +69,7 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
 				$model->setData($data);
 				$model->save();
 				
-				$this->_getSession()->addSuccess($this->__('Saved.'));
+				$this->_getSession()->addSuccess($this->__('Saved'));
 			} catch (Exception $e){
 				$this->_getSession()->addError($e->getMessage());
 			}
@@ -92,7 +92,7 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
 				}
 				
 				$this->_getSession()->addSuccess(
-					$this->__('Total of %d record(s) have been deleted.', count($data))
+					$this->__('Total of %d record(s) have been deleted', count($data))
 				);
 			} catch (Exception $e){
 				$this->_getSession()->addError($e->getMessage());

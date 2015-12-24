@@ -26,6 +26,13 @@
 								</MakingSense_Doppler>
 						</modules>
 				</translate>
+				<layout>
+						<updates>
+								<MakingSense_Doppler>
+										<file>makingsense_doppler.xml</file>
+								</MakingSense_Doppler>
+						</updates>
+				</layout>
 		</adminhtml>
 		<global>
 				<helpers>

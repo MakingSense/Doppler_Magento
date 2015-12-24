@@ -74,9 +74,8 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                         $model->save();
                     }
 
-                    $this->_getSession()->addSuccess($this->__('The lists have been sucessfully synced'));
                 } else {
-                    $this->_getSession()->addError($this->__('The following errors ocurred creating your list: %s', $responseContent['title']));
+                    $this->_getSession()->addError($this->__('The following errors occurred creating your list: %s', $responseContent['title']));
                 }
             }
 
@@ -118,38 +117,21 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
         $id = $this->getRequest()->getParam('id');
         if ($id){
             try {
-                $model = Mage::getModel('makingsense_doppler/lists')->load($id);
-                if (!$model->getId()){
+                $list = Mage::getModel('makingsense_doppler/lists')->load($id);
+                if (!$list->getId()){
                     $this->_getSession()->addError("List %s does not exist", $id);
                     $this->_redirect("*/*/");
                     return;
                 }
 
-                $model->delete();
-                $this->_getSession()->addSuccess($this->__('List deleted'));
-            } catch (Exception $e){
-                $this->_getSession()->addError($e->getMessage());
-            }
-        }
-
-        $this->_redirect("*/*/");
-    }
-
-    public function saveAction()
-    {
-        $data = $this->getRequest()->getPost();
-
-        if ($data)
-        {
-            try {
                 // Get cURL resource
                 $ch = curl_init();
 
                 // Set url
-                curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists');
+                curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists/' . $list->getListId());
 
                 // Set method
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
 
                 // Set options
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -157,18 +139,10 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                 // Set headers
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                         "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
-                        "Content-Type: text/xml",
+                        "Content-Type: application/json",
                     ]
                 );
 
-                // Create body
-                $body = '{ name: "' . $data['name'] . '" }';
-
-                Mage::log($body, null,'body.log');
-
-                // Set body
-                curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 
                 // Send the request & save response to $resp
                 $resp = curl_exec($ch);
@@ -182,19 +156,144 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                     Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
                     Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
 
-                    if ($statusCode == '201') {
-                        $this->_getSession()->addSuccess($this->__('The list has been sucessfully created.'));
+                    if ($statusCode == '200') {
+                        $this->_getSession()->addSuccess($this->__("The list '%s' has been successfully removed", $list->getName()));
                     } else {
                         $responseContent = json_decode($resp, true);
-                        $this->_getSession()->addError($this->__('The following errors ocurred creating your list: ' . $responseContent['title']));
+                        $this->_getSession()->addError($this->__('The following errors occurred removing your list: ' . $responseContent['title']));
                     }
                 }
 
                 // Close request to clear up some resources
                 curl_close($ch);
 
+                $list->delete();
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());
+            }
+        }
+
+        $this->_redirect("*/*/");
+    }
+
+    public function saveAction()
+    {
+        $data = $this->getRequest()->getPost();
+
+        if ($data) {
+            // If we are editing a list, then save the new list name
+            if (array_key_exists('id', $data)) {
+                try {
+                    // Get cURL resource
+                    $ch = curl_init();
+
+                    // Set url
+                    curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists/' . $data['list_id']);
+
+                    // Set method
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+
+                    // Set options
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+                    // Set headers
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
+                            "Content-Type: application/json",
+                        ]
+                    );
+
+                    // Create body
+                    $body = '{ name: "' . $data['name'] . '" }';
+
+                    // Set body
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+
+                    // Send the request & save response to $resp
+                    $resp = curl_exec($ch);
+
+                    if (!$resp) {
+                        Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                    } else {
+
+                        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                        Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                        Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
+
+                        if ($statusCode == '200') {
+                            $this->_getSession()->addSuccess($this->__('The changes have been saved'));
+                        } else {
+                            $responseContent = json_decode($resp, true);
+                            $this->_getSession()->addError($this->__('The following errors occurred creating your list: ' . $responseContent['title']));
+                        }
+                    }
+
+                    // Close request to clear up some resources
+                    curl_close($ch);
+
+                } catch (Exception $e) {
+                    $this->_getSession()->addError($e->getMessage());
+                }
+            }
+            // Else, save the new list
+            else {
+                try {
+                    // Get cURL resource
+                    $ch = curl_init();
+
+                    // Set url
+                    curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists');
+
+                    // Set method
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+
+                    // Set options
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+                    // Set headers
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
+                            "Content-Type: application/json",
+                        ]
+                    );
+
+                    // Create body
+                    $body = '{ name: "' . $data['name'] . '" }';
+
+                    Mage::log($body, null, 'body.log');
+
+                    // Set body
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+
+                    // Send the request & save response to $resp
+                    $resp = curl_exec($ch);
+
+                    if (!$resp) {
+                        Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                    } else {
+
+                        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                        Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                        Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
+
+                        if ($statusCode == '201') {
+                            $this->_getSession()->addSuccess($this->__('The list has been successfully created'));
+                        } else {
+                            $responseContent = json_decode($resp, true);
+                            $this->_getSession()->addError($this->__('The following errors occurred creating your list: ' . $responseContent['title']));
+                        }
+                    }
+
+                    // Close request to clear up some resources
+                    curl_close($ch);
+
+                } catch (Exception $e) {
+                    $this->_getSession()->addError($e->getMessage());
+                }
             }
         }
 
@@ -210,13 +309,54 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
         } else {
             try {
                 foreach ($data as $id){
-                    $lists = Mage::getModel('makingsense_doppler/lists')->load($id);
-                    $lists->delete();
-                }
+                    $list = Mage::getModel('makingsense_doppler/lists')->load($id);
 
-                $this->_getSession()->addSuccess(
-                    $this->__('Total of %d record(s) have been deleted', count($data))
-                );
+                    // Get cURL resource
+                    $ch = curl_init();
+
+                    // Set url
+                    curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists/' . $list->getListId());
+
+                    // Set method
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+
+                    // Set options
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+                    // Set headers
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
+                            "Content-Type: application/json",
+                        ]
+                    );
+
+
+                    // Send the request & save response to $resp
+                    $resp = curl_exec($ch);
+
+                    if(!$resp) {
+                        Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                    } else {
+
+                        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                        Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                        Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
+
+                        if ($statusCode == '200') {
+                            $this->_getSession()->addSuccess($this->__("The list '%s' has been successfully removed", $list->getName()));
+                        } else {
+                            $responseContent = json_decode($resp, true);
+                            $this->_getSession()->addError($this->__('The following errors occurred removing your list: ' . $responseContent['title']));
+                        }
+                    }
+
+                    // Close request to clear up some resources
+                    curl_close($ch);
+
+
+                    $list->delete();
+                }
             } catch (Exception $e){
                 $this->_getSession()->addError($e->getMessage());
             }

@@ -13,15 +13,9 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 			'action' => $this->getUrl("*/*/save", array('id' => $this->getRequest()->getParam('id'))),
 			'method' => 'post'
 		));
-		
+
         $fieldset = $form->addFieldset('lists_form', array(
 			'legend' => Mage::helper('makingsense_doppler')->__('List information')
-		));
-
-		$fieldset->addField('list_id', 'hidden', array(
-			'label'     => Mage::helper('makingsense_doppler')->__('List ID'),
-			'required'  => false,
-			'name'      => 'list_id',
 		));
 
 		$fieldset->addField('name', 'text', array(
@@ -31,17 +25,33 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 			'name'      => 'name',
 		));
 
-		$fieldset->addField('creation_date', 'hidden', array(
-			'label'     => Mage::helper('makingsense_doppler')->__('Creation Date'),
-			'required'  => false,
-			'name'      => 'creation_date',
-		));
+		if ($this->getRequest()->getParam('id')) {
 
-		$fieldset->addField('subscribers_count', 'hidden', array(
-			'label'     => Mage::helper('makingsense_doppler')->__('Subscribers Count'),
-			'required'  => false,
-			'name'      => 'subscribers_count',
-		));
+			$fieldset->addField('list_id', 'text', array(
+				'label'     => Mage::helper('makingsense_doppler')->__('List ID'),
+				'required'  => false,
+				'readonly' => true,
+				'name'      => 'list_id',
+				'class'		=> 'non-editable'
+			));
+
+			$fieldset->addField('creation_date', 'text', array(
+				'label'     => Mage::helper('makingsense_doppler')->__('Creation Date'),
+				'required'  => false,
+				'readonly' => true,
+				'name'      => 'creation_date',
+				'class'		=> 'non-editable'
+			));
+
+			$fieldset->addField('subscribers_count', 'text', array(
+				'label'     => Mage::helper('makingsense_doppler')->__('Subscribers Count'),
+				'required'  => false,
+				'readonly' => true,
+				'name'      => 'subscribers_count',
+				'class'		=> 'non-editable'
+			));
+
+		}
 
 		if ($model->getId()){
 			$fieldset->addField('id', 'hidden', array(

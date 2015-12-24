@@ -20,13 +20,24 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Grid extends Mage_Adminhtml_Bloc
 	}
 	
 	protected function _prepareColumns (){
+		$this->addColumn('list_id', array(
+			'header' => Mage::helper('makingsense_doppler')->__('List ID'),
+			'index' => 'list_id',
+			'width' => '90px'
+		));
 		$this->addColumn('name', array(
 			'header' => Mage::helper('makingsense_doppler')->__('List Name'),
 			'index' => 'name'
 		));
 		$this->addColumn('creation_date', array(
 			'header' => Mage::helper('makingsense_doppler')->__('Creation Date'),
-			'index' => 'creation_date'
+			'index' => 'creation_date',
+			'width' => '200px'
+		));
+		$this->addColumn('subscribers_count', array(
+			'header' => Mage::helper('makingsense_doppler')->__('Subscribers Count'),
+			'index' => 'subscribers_count',
+			'width' => '90px'
 		));
 	}
 	

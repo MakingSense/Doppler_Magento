@@ -1,0 +1,4 @@
+.non-editable {
+    background-color: transparent !important;
+    border-width: 0 !important;
+}

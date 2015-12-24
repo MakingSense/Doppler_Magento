@@ -2,7 +2,7 @@
 <config>
     <sections>
         <doppler translate="label" module="makingsense_doppler">
-            <label>Doppler API</label>
+            <label>Doppler</label>
             <tab>customer</tab>
             <frontend_type>text</frontend_type>
             <sort_order>15</sort_order>

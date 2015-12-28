@@ -87,12 +87,25 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
                 $savedDopplerFieldName = '';
 
                 foreach ($mappedFields as $field) {
-                    $dopplerFieldName = $field['doppler_field_name'];
 
-                    $savedDopplerFieldName = $data['doppler_field_name'];
+                    // If editing mapping
+                    if (array_key_exists('id', $data)) {
+                        if ($field['id'] != $data['id']) {
+                            $dopplerFieldName = $field['doppler_field_name'];
+                            $savedDopplerFieldName = $data['doppler_field_name'];
 
-                    if ($dopplerFieldName == $savedDopplerFieldName) {
-                        $fieldAlreadyExist = true;
+                            if ($dopplerFieldName == $savedDopplerFieldName) {
+                                $fieldAlreadyExist = true;
+                            }
+                        }
+                    // If creating new mapping
+                    } else {
+                        $dopplerFieldName = $field['doppler_field_name'];
+                        $savedDopplerFieldName = $data['doppler_field_name'];
+
+                        if ($dopplerFieldName == $savedDopplerFieldName) {
+                            $fieldAlreadyExist = true;
+                        }
                     }
                 }
 
@@ -101,7 +114,7 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
                     $model->setData($data);
                     $model->save();
 
-                    $this->_getSession()->addSuccess($this->__('Saved.'));
+                    $this->_getSession()->addSuccess($this->__('Saved'));
                 } else {
                     $this->_getSession()->addError($this->__('There is already a Magento attribute associated with the following Doppler field: %s', $savedDopplerFieldName));
                 }

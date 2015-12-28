@@ -9,7 +9,7 @@
     $installer->addAttribute('customer', 'doppler_synced', array(
         'input'         => 'boolean',
         'type'          => 'int',
-        'label'         => 'Synced with Doppler',
+        'label'         => 'Exported to Doppler',
         'visible'       => 1,
         'required'      => 0,
         'user_defined' => 0,

@@ -5,6 +5,10 @@
 						<title>Doppler</title>
 						<sort_order>65</sort_order>
 						<children>
+								<doppler_subscribers translate="title" module="makingsense_doppler">
+										<title>Subscribers</title>
+										<action>adminhtml/subscribers</action>
+								</doppler_subscribers>
 								<doppler_lists translate="title" module="makingsense_doppler">
 										<title>Doppler Lists</title>
 										<action>adminhtml/lists</action>

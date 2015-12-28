@@ -1,0 +1,216 @@
+<?php
+
+class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends MakingSense_Doppler_Block_Adminhtml_Customer_Grid {
+
+	public function __construct()
+	{
+		parent::__construct();
+		$this->setId('customerGrid');
+		$this->setUseAjax(true);
+		$this->setDefaultSort('entity_id');
+		$this->setSaveParametersInSession(true);
+	}
+
+	/**
+	 * override the _prepareCollection to add an other attribute to the grid
+	 * @return $this
+	 */
+	protected function _prepareCollection(){
+		$collection = Mage::getResourceModel('customer/customer_collection')
+			->addNameToSelect()
+			->addAttributeToSelect('email')
+			->addAttributeToSelect('created_at')
+			->addAttributeToSelect('group_id')
+			// Add dopply_synced attribute to grid
+			->addAttributeToSelect('doppler_synced')
+			->joinAttribute('billing_postcode', 'customer_address/postcode', 'default_billing', null, 'left')
+			->joinAttribute('billing_city', 'customer_address/city', 'default_billing', null, 'left')
+			->joinAttribute('billing_telephone', 'customer_address/telephone', 'default_billing', null, 'left')
+			->joinAttribute('billing_region', 'customer_address/region', 'default_billing', null, 'left')
+			->joinAttribute('billing_country_id', 'customer_address/country_id', 'default_billing', null, 'left');
+
+		$this->setCollection($collection);
+
+		if ($this->getCollection()) {
+
+			$this->_preparePage();
+
+			$columnId = $this->getParam($this->getVarNameSort(), $this->_defaultSort);
+			$dir      = $this->getParam($this->getVarNameDir(), $this->_defaultDir);
+			$filter   = $this->getParam($this->getVarNameFilter(), null);
+
+			if (is_null($filter)) {
+				$filter = $this->_defaultFilter;
+			}
+
+			if (is_string($filter)) {
+				$data = $this->helper('adminhtml')->prepareFilterString($filter);
+				$this->_setFilterValues($data);
+			}
+			else if ($filter && is_array($filter)) {
+				$this->_setFilterValues($filter);
+			}
+			else if(0 !== sizeof($this->_defaultFilter)) {
+				$this->_setFilterValues($this->_defaultFilter);
+			}
+
+			if (isset($this->_columns[$columnId]) && $this->_columns[$columnId]->getIndex()) {
+				$dir = (strtolower($dir)=='desc') ? 'desc' : 'asc';
+				$this->_columns[$columnId]->setDir($dir);
+				$this->_setCollectionOrder($this->_columns[$columnId]);
+			}
+
+			if (!$this->_isExport) {
+				$this->getCollection()->load();
+				$this->_afterLoadCollection();
+			}
+		}
+
+		return $this;
+	}
+
+	protected function _prepareMassaction()
+	{
+		$this->setMassactionIdField('entity_id');
+		$this->getMassactionBlock()->setFormFieldName('customer');
+
+		$this->getMassactionBlock()->addItem('delete', array(
+			'label'    => Mage::helper('customer')->__('Delete'),
+			'url'      => $this->getUrl('*/*/massDelete'),
+			'confirm'  => Mage::helper('customer')->__('Are you sure?')
+		));
+
+		$this->getMassactionBlock()->addItem('newsletter_subscribe', array(
+			'label'    => Mage::helper('customer')->__('Subscribe to Newsletter'),
+			'url'      => $this->getUrl('*/*/massSubscribe')
+		));
+
+		$this->getMassactionBlock()->addItem('newsletter_unsubscribe', array(
+			'label'    => Mage::helper('customer')->__('Unsubscribe from Newsletter'),
+			'url'      => $this->getUrl('*/*/massUnsubscribe')
+		));
+
+		$groups = $this->helper('customer')->getGroups()->toOptionArray();
+
+		array_unshift($groups, array('label'=> '', 'value'=> ''));
+		$this->getMassactionBlock()->addItem('assign_group', array(
+			'label'        => Mage::helper('customer')->__('Assign a Customer Group'),
+			'url'          => $this->getUrl('*/*/massAssignGroup'),
+			'additional'   => array(
+				'visibility'    => array(
+					'name'     => 'group',
+					'type'     => 'select',
+					'class'    => 'required-entry',
+					'label'    => Mage::helper('customer')->__('Group'),
+					'values'   => $groups
+				)
+			)
+		));
+
+		return $this;
+	}
+
+	/**
+	 * override the _prepareColumns method to add a new column after the 'email' column
+	 * if you want the new column on a different position just change the 3rd parameter
+	 * of the addColumnAfter method to the id of your desired column
+	 */
+	protected function _prepareColumns(){
+		$this->addColumn('entity_id', array(
+			'header'    => Mage::helper('customer')->__('ID'),
+			'width'     => '50px',
+			'index'     => 'entity_id',
+			'type'  => 'number',
+		));
+
+		$this->addColumn('name', array(
+			'header'    => Mage::helper('customer')->__('Name'),
+			'index'     => 'name',
+			'width'     => '150px'
+		));
+
+		$this->addColumn('email', array(
+			'header'    => Mage::helper('customer')->__('Email'),
+			'width'     => '150',
+			'index'     => 'email'
+		));
+
+		$groups = Mage::getResourceModel('customer/group_collection')
+			->addFieldToFilter('customer_group_id', array('gt'=> 0))
+			->load()
+			->toOptionHash();
+
+		$this->addColumn('group', array(
+			'header'    =>  Mage::helper('customer')->__('Group'),
+			'width'     =>  '100',
+			'index'     =>  'group_id',
+			'type'      =>  'options',
+			'options'   =>  $groups,
+		));
+
+		$this->addColumn('billing_country_id', array(
+			'header'    => Mage::helper('customer')->__('Country'),
+			'width'     => '100',
+			'type'      => 'country',
+			'index'     => 'billing_country_id',
+		));
+
+		$this->addColumn('billing_region', array(
+			'header'    => Mage::helper('customer')->__('State/Province'),
+			'width'     => '100',
+			'index'     => 'billing_region',
+		));
+
+		if (!Mage::app()->isSingleStoreMode()) {
+			$this->addColumn('website_id', array(
+				'header'    => Mage::helper('customer')->__('Website'),
+				'align'     => 'center',
+				'width'     => '80px',
+				'type'      => 'options',
+				'options'   => Mage::getSingleton('adminhtml/system_store')->getWebsiteOptionHash(true),
+				'index'     => 'website_id',
+			));
+		}
+		$this->addColumnAfter('doppler_synced', array(
+			'header'    => Mage::helper('customer')->__('Exported to Doppler'),
+			'index'     => 'doppler_synced',
+			'type'=>'options',
+			'width'     => '80px',
+			'options' => array('1' => 'Yes', '0' => 'No', '' => 'No')
+		),'website');
+
+		$this->addColumn('action',
+			array(
+				'header'    =>  Mage::helper('customer')->__('Action'),
+				'width'     => '120',
+				'type'      => 'action',
+				'getter'    => 'getId',
+				'actions'   => array(
+					array(
+						'caption'   => Mage::helper('customer')->__('Export to Doppler'),
+						'url'       => array('base'=> '*/*/edit'),
+						'field'     => 'id'
+					)
+				),
+				'filter'    => false,
+				'sortable'  => false,
+				'index'     => 'stores',
+				'is_system' => true,
+			));
+
+		$this->addExportType('*/*/exportCsv', Mage::helper('customer')->__('CSV'));
+		$this->addExportType('*/*/exportXml', Mage::helper('customer')->__('Excel XML'));
+
+	}
+
+	public function getGridUrl()
+	{
+		return $this->getUrl('*/*/grid', array('_current'=> true));
+	}
+
+	public function getRowUrl($row)
+	{
+		return $this->getUrl('*/*/edit', array('id'=>$row->getId()));
+	}
+	
+}

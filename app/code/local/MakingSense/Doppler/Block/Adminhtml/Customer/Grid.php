@@ -59,19 +59,4 @@
             return $this;
         }
 
-        /**
-         * override the _prepareColumns method to add a new column after the 'email' column
-         * if you want the new column on a different position just change the 3rd parameter
-         * of the addColumnAfter method to the id of your desired column
-         */
-        protected function _prepareColumns(){
-            $this->addColumnAfter('doppler_synced', array(
-                'header'    => Mage::helper('customer')->__('Synced with Doppler'),
-                'index'     => 'doppler_synced',
-                'type'=>'options',
-                'options' => array('1' => 'Yes', '0' => 'No', '' => 'No')
-            ),'email');
-            return parent::_prepareColumns();
-        }
-
     }

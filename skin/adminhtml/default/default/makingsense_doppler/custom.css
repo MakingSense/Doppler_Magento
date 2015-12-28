@@ -1,4 +1,9 @@
 .non-editable {
     background-color: transparent !important;
     border-width: 0 !important;
+    cursor: default;
+}
+
+.adminhtml-subscribers-index button.add span {
+    background-image: url("../images/save_btn_icon.gif");
 }

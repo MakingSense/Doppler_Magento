@@ -61,9 +61,6 @@
 										<doppler_leadmap>
 												<table>doppler_leadmap</table>
 										</doppler_leadmap>
-										<doppler_subscribers>
-												<table>doppler_subscribers</table>
-										</doppler_subscribers>
 										<doppler_lists>
 												<table>doppler_lists</table>
 										</doppler_lists>

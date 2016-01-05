@@ -1,27 +1,49 @@
 <?php
+/**
+ * Leadmap admin page controller
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
 
-class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Controller_Action {
-
-    protected function initAction (){
+class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Controller_Action
+{
+    /**
+     * Set active menu
+     */
+    protected function initAction()
+    {
         $this->loadLayout()
             ->_setActiveMenu('makingsense_doppler/leadmap');
 
         return $this;
     }
 
-    public function indexAction (){
+    /**
+     * Create block for index action
+     */
+    public function indexAction()
+    {
 
         $this->initAction()
             ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_leadmap'))
             ->renderLayout();
     }
 
-    public function newAction (){
+    /**
+     * Forward new to edit action
+     */
+    public function newAction()
+    {
         $this->_forward('edit');
     }
 
-    public function editAction (){
-
+    /**
+     * Edit action logic
+     */
+    public function editAction()
+    {
         if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
             Mage::getSingleton('core/session')->addError($this->__('The Doppler API is not currently available, please try later'));
 
@@ -52,7 +74,11 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
 
     }
 
-    public function deleteAction (){
+    /**
+     * Delete action logic
+     */
+    public function deleteAction()
+    {
         $id = $this->getRequest()->getParam('id');
         if ($id){
             try {
@@ -73,7 +99,11 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
         $this->_redirect("*/*/");
     }
 
-    public function saveAction (){
+    /**
+     * Save action logic
+     */
+    public function saveAction()
+    {
 
         $data = $this->getRequest()->getPost();
 
@@ -127,7 +157,11 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
         $this->_redirect("*/*/");
     }
 
-    public function massDeleteAction (){
+    /**
+     * MassDelete action logic
+     */
+    public function massDeleteAction()
+    {
         $data = $this->getRequest()->getParam('leadmap');
         if (!is_array($data)){
             $this->_getSession()->addError(

@@ -1,10 +1,20 @@
 <?php
-
-class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml_Block_Widget_Form {
-
-	protected $_fieldsArray = null;
-
-	protected function _prepareForm (){
+/**
+ * Lists edit form
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
+class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
+{
+	/**
+	 * Prepare form before rendering HTML
+	 *
+	 * @return MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form
+	 */
+	protected function _prepareForm()
+	{
 
 		$model = Mage::registry('lists_data');
 		
@@ -25,8 +35,8 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 			'name'      => 'name',
 		));
 
-		if ($this->getRequest()->getParam('id')) {
-
+		if ($this->getRequest()->getParam('id'))
+		{
 			$fieldset->addField('list_id', 'text', array(
 				'label'     => Mage::helper('makingsense_doppler')->__('List ID'),
 				'required'  => false,
@@ -40,7 +50,7 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 				'required'  => false,
 				'readonly' => true,
 				'name'      => 'creation_date',
-				'class'		=> 'non-editable'
+				'class'		=> 'non-cleditable'
 			));
 
 			$fieldset->addField('subscribers_count', 'text', array(
@@ -53,7 +63,8 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 
 		}
 
-		if ($model->getId()){
+		if ($model->getId())
+		{
 			$fieldset->addField('id', 'hidden', array(
 				'name' => 'id',
             ));

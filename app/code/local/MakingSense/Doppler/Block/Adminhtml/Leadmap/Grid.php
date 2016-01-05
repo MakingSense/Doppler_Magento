@@ -1,7 +1,18 @@
 <?php
-
-class MakingSense_Doppler_Block_Adminhtml_Leadmap_Grid extends Mage_Adminhtml_Block_Widget_Grid {
-	public function __construct (){
+/**
+ * Leadmap edit grid
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
+class MakingSense_Doppler_Block_Adminhtml_Leadmap_Grid extends Mage_Adminhtml_Block_Widget_Grid
+{
+	/**
+	 * Set grid ID, default sort by and direction
+	 */
+	public function __construct()
+	{
 		parent::__construct();
 		
 		$this->setId('makingsense_doppler_leadmap_grid');
@@ -9,26 +20,45 @@ class MakingSense_Doppler_Block_Adminhtml_Leadmap_Grid extends Mage_Adminhtml_Bl
 		$this->setDefaultDir('asc');
 		$this->setSaveParametersInSession(true);
 	}
-	
-    protected function _prepareCollection (){
+
+	/**
+	 * Set collection for grid
+	 */
+    protected function _prepareCollection()
+	{
 		$collection = Mage::getModel('makingsense_doppler/leadmap')->getCollection();
 		$this->setCollection($collection);
 		
 		return parent::_prepareCollection();
 	}
-	
-	protected function _prepareColumns (){
+
+	/**
+	 * Set columns for grid
+	 */
+	protected function _prepareColumns()
+	{
+		$this->addColumn('id', array(
+			'header' => Mage::helper('makingsense_doppler')->__('Mapping ID'),
+			'index'  => 'id',
+			'align'  => 'center',
+			'width'  => '60px',
+			'filter' => false
+		));
 		$this->addColumn('doppler_field_name', array(
 			'header' => Mage::helper('makingsense_doppler')->__('Doppler Field Name'),
-			'index' => 'doppler_field_name'
+			'index'  => 'doppler_field_name'
 		));
 		$this->addColumn('magento_field_name', array(
 			'header' => Mage::helper('makingsense_doppler')->__('Magento Field Name'),
-			'index' => 'magento_field_name'
+			'index'  => 'magento_field_name'
 		));
 	}
-	
-	protected function _prepareMassaction (){
+
+	/**
+	 * Set mass actions for grid items
+	 */
+	protected function _prepareMassaction()
+	{
 		$this->setMassactionIdField('id');
 		$this->getMassactionBlock()->setFormFieldName('leadmap');
 
@@ -40,8 +70,12 @@ class MakingSense_Doppler_Block_Adminhtml_Leadmap_Grid extends Mage_Adminhtml_Bl
 		
 		return parent::_prepareMassaction();
 	}
-	
-	public function getRowUrl ($row){
+
+	/**
+	 * Set URL for row click
+	 */
+	public function getRowUrl($row)
+	{
 		return $this->getUrl('*/*/edit', array('id' => $row->getId()));
 	}
 }

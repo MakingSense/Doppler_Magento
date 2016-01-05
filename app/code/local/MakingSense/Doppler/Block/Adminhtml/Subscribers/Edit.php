@@ -1,16 +1,29 @@
 <?php
-
+/**
+ * Subscribers edit form container
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
 class MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
-
-	public function __construct (){
+	/**
+	 * Set block group and controller
+	 */
+	public function __construct()
+	{
 		$this->_blockGroup = 'makingsense_doppler';
 		$this->_controller = 'adminhtml_subscribers';
 
 		parent::__construct();
 	}
-	
-	public function getHeaderText (){
+
+	/**
+	 * Set header text
+	 */
+	public function getHeaderText()
+	{
 		return $this->__('Export Customers');
 	}
 

@@ -1,15 +1,29 @@
 <?php
-
-class MakingSense_Doppler_Block_Adminhtml_Lists_Edit extends Mage_Adminhtml_Block_Widget_Form_Container {
-
-	public function __construct (){
+/**
+ * Lists edit form container
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
+class MakingSense_Doppler_Block_Adminhtml_Lists_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
+{
+	/**
+	 * Set block group and controller
+	 */
+	public function __construct()
+	{
 		$this->_blockGroup = 'makingsense_doppler';
 		$this->_controller = 'adminhtml_lists';
 		
 		parent::__construct();
 	}
-	
-	public function getHeaderText (){
+
+	/**
+	 * Set header text
+	 */
+	public function getHeaderText()
+	{
 			return $this->__('Lists');
 	}
 

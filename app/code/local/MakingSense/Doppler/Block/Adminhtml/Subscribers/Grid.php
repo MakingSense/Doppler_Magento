@@ -1,7 +1,24 @@
 <?php
+/**
+ * Subscribers edit grid
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
+class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends Mage_Adminhtml_Block_Widget_Grid
+{
 
-class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends MakingSense_Doppler_Block_Adminhtml_Customer_Grid {
+	/**
+	 * Massaction block name
+	 *
+	 * @var string
+	 */
+	protected $_massactionBlockName = 'makingsense_doppler/adminhtml_subscribers_grid_massaction';
 
+	/**
+	 * Set grid ID, default sort by and direction
+	 */
 	public function __construct()
 	{
 		parent::__construct();
@@ -15,13 +32,14 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends MakingSense_D
 	 * override the _prepareCollection to add an other attribute to the grid
 	 * @return $this
 	 */
-	protected function _prepareCollection(){
+	protected function _prepareCollection()
+	{
 		$collection = Mage::getResourceModel('customer/customer_collection')
 			->addNameToSelect()
 			->addAttributeToSelect('email')
 			->addAttributeToSelect('created_at')
 			->addAttributeToSelect('group_id')
-			// Add dopply_synced attribute to grid
+			// Add doppler_synced attribute to grid
 			->addAttributeToSelect('doppler_synced')
 			->joinAttribute('billing_postcode', 'customer_address/postcode', 'default_billing', null, 'left')
 			->joinAttribute('billing_city', 'customer_address/city', 'default_billing', null, 'left')
@@ -69,43 +87,24 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends MakingSense_D
 		return $this;
 	}
 
+	/**
+	 * Set mass actions for grid items
+	 */
 	protected function _prepareMassaction()
 	{
 		$this->setMassactionIdField('entity_id');
 		$this->getMassactionBlock()->setFormFieldName('customer');
 
-		$this->getMassactionBlock()->addItem('delete', array(
-			'label'    => Mage::helper('customer')->__('Delete'),
-			'url'      => $this->getUrl('*/*/massDelete'),
-			'confirm'  => Mage::helper('customer')->__('Are you sure?')
-		));
+		$dopplerLists = Mage::helper('makingsense_doppler')->getDopplerLists();
 
-		$this->getMassactionBlock()->addItem('newsletter_subscribe', array(
-			'label'    => Mage::helper('customer')->__('Subscribe to Newsletter'),
-			'url'      => $this->getUrl('*/*/massSubscribe')
-		));
+		foreach ($dopplerLists as $dopplerList) {
+			$listIdentifier = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $dopplerList));
 
-		$this->getMassactionBlock()->addItem('newsletter_unsubscribe', array(
-			'label'    => Mage::helper('customer')->__('Unsubscribe from Newsletter'),
-			'url'      => $this->getUrl('*/*/massUnsubscribe')
-		));
-
-		$groups = $this->helper('customer')->getGroups()->toOptionArray();
-
-		array_unshift($groups, array('label'=> '', 'value'=> ''));
-		$this->getMassactionBlock()->addItem('assign_group', array(
-			'label'        => Mage::helper('customer')->__('Assign a Customer Group'),
-			'url'          => $this->getUrl('*/*/massAssignGroup'),
-			'additional'   => array(
-				'visibility'    => array(
-					'name'     => 'group',
-					'type'     => 'select',
-					'class'    => 'required-entry',
-					'label'    => Mage::helper('customer')->__('Group'),
-					'values'   => $groups
-				)
-			)
-		));
+			$this->getMassactionBlock()->addItem($listIdentifier, array(
+				'label'    => $dopplerList,
+				'url'      => $this->getUrl('*/*/massExport', array('list' => array_search($dopplerList, $dopplerLists)))
+			));
+		}
 
 		return $this;
 	}
@@ -120,7 +119,8 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends MakingSense_D
 			'header'    => Mage::helper('customer')->__('ID'),
 			'width'     => '50px',
 			'index'     => 'entity_id',
-			'type'  => 'number',
+			'type'  	=> 'number',
+			'filter'	=> false
 		));
 
 		$this->addColumn('name', array(
@@ -174,29 +174,12 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends MakingSense_D
 		$this->addColumnAfter('doppler_synced', array(
 			'header'    => Mage::helper('customer')->__('Exported to Doppler'),
 			'index'     => 'doppler_synced',
-			'type'=>'options',
+			'align'		=> 'center',
+			'type'		=> 'options',
 			'width'     => '80px',
-			'options' => array('1' => 'Yes', '0' => 'No', '' => 'No')
+			'filter'     => false,
+			'options' 	=>  array('1' => 'Yes', '0' => 'No', '' => 'No')
 		),'website');
-
-		$this->addColumn('action',
-			array(
-				'header'    =>  Mage::helper('customer')->__('Action'),
-				'width'     => '120',
-				'type'      => 'action',
-				'getter'    => 'getId',
-				'actions'   => array(
-					array(
-						'caption'   => Mage::helper('customer')->__('Export to Doppler'),
-						'url'       => array('base'=> '*/*/edit'),
-						'field'     => 'id'
-					)
-				),
-				'filter'    => false,
-				'sortable'  => false,
-				'index'     => 'stores',
-				'is_system' => true,
-			));
 
 		$this->addExportType('*/*/exportCsv', Mage::helper('customer')->__('CSV'));
 		$this->addExportType('*/*/exportXml', Mage::helper('customer')->__('Excel XML'));

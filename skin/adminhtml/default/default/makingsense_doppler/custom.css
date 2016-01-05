@@ -7,3 +7,11 @@
 .adminhtml-subscribers-index button.add span {
     background-image: url("../images/save_btn_icon.gif");
 }
+
+.adminhtml-subscribers-index td.last {
+    background-color: #FFFCDD;
+}
+
+.adminhtml-subscribers-index tr.even td.last {
+    background-color: #F3F0D3;
+}

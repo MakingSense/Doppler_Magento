@@ -1,14 +1,28 @@
 <?php
+/**
+ * Subscribers admin page controller
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
 
-class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml_Controller_Action {
-
-    protected function initAction (){
+class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml_Controller_Action
+{
+    /**
+     * Set active menu
+     */
+    protected function initAction()
+    {
         $this->loadLayout()
             ->_setActiveMenu('makingsense_doppler/subscribers');
 
         return $this;
     }
 
+    /**
+     * Load current customer
+     */
     protected function _initCustomer($idFieldName = 'id')
     {
         $this->_title($this->__('Customers'))->_title($this->__('Manage Subscribers'));
@@ -61,7 +75,9 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
     public function gridAction()
     {
         $this->loadLayout();
-        $this->renderLayout();
+        $this->getResponse()->setBody(
+            $this->getLayout()->createBlock('makingsense_doppler/adminhtml_subscribers_grid')->toHtml()
+        );
     }
 
     /**
@@ -135,56 +151,69 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
 
         if ($data) {
             try {
-                // Get cURL resource
-                $ch = curl_init();
 
-                // Set url
-                curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists/' . $data['doppler_list'] . '/subscribers');
+                $usernameValue = Mage::getStoreConfig('doppler/connection/username');
+                $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-                Mage::log('https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists/' . $data['doppler_list'] . '/subscribers', null,'curlOpt.log');
+                if($usernameValue != '' && $apiKeyValue != '') {
+                    // Get cURL resource
+                    $ch = curl_init();
 
-                // Set method
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+                    // Set url
+                    curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue . '/lists/' . $data['doppler_list'] . '/subscribers');
 
-                // Set options
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    // Set method
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 
-                // Set headers
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        "Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
-                        "Content-Type: application/json",
-                    ]
-                );
+                    // Set options
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-                // Create body
-                $body = '{ email: "' . $data['email'] . '" }';
+                    // Set headers
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "Authorization: token " . $apiKeyValue,
+                            "Content-Type: application/json",
+                        ]
+                    );
 
-                // Set body
-                curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+                    // Create body
+                    $body = '{ email: "' . $data['email'] . '" }';
 
-                // Send the request & save response to $resp
-                $resp = curl_exec($ch);
+                    // Set body
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 
-                if (!$resp) {
-                    Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                } else {
+                    // Send the request & save response to $resp
+                    $resp = curl_exec($ch);
 
-                    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                    Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                    Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                    if ($statusCode == '200') {
-                        $this->_getSession()->addSuccess($this->__('The customer has been subscribed to the selected list'));
+                    if (!$resp) {
+                        Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
                     } else {
-                        $responseContent = json_decode($resp, true);
-                        $this->_getSession()->addError($this->__('The following errors occurred processing your request: ' . $responseContent['title']));
-                    }
-                }
 
-                // Close request to clear up some resources
-                curl_close($ch);
+                        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                        Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                        Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
+
+                        if ($statusCode == '200') {
+                            $this->_getSession()->addSuccess($this->__('The customer has been subscribed to the selected list'));
+
+                            // Set doppler_synced attribute to true since the customer was successfully exported
+                            $customer = Mage::getModel('customer/customer');
+                            $customer->setWebsiteId(Mage::app()->getWebsite()->getId());
+                            $customer->load($data['entity_id']);
+                            if($customer->getId() > 1){
+                                $customer->setDopplerSynced('1')->save();
+                            }
+
+                        } else {
+                            $responseContent = json_decode($resp, true);
+                            $this->_getSession()->addError($this->__('The following errors occurred processing your request: ' . $responseContent['title']));
+                        }
+                    }
+
+                    // Close request to clear up some resources
+                    curl_close($ch);
+                }
 
             } catch (Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -234,267 +263,94 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
     }
 
     /**
-     * Customer orders grid
-     *
+     * MassExport action logic
      */
-    public function ordersAction() {
-        $this->_initCustomer();
-        $this->loadLayout();
-        $this->renderLayout();
-    }
-
-    /**
-     * Customer last orders grid for ajax
-     *
-     */
-    public function lastOrdersAction() {
-        $this->_initCustomer();
-        $this->loadLayout();
-        $this->renderLayout();
-    }
-
-    /**
-     * Customer newsletter grid
-     *
-     */
-    public function newsletterAction()
+    public function massExportAction()
     {
-        $this->_initCustomer();
-        $subscriber = Mage::getModel('newsletter/subscriber')
-            ->loadByCustomer(Mage::registry('current_customer'));
+        $customersIds = $this->getRequest()->getParam('customer');
+        if(!is_array($customersIds)) {
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select customer(s).'));
 
-        Mage::register('subscriber', $subscriber);
-        $this->loadLayout();
-        $this->renderLayout();
-    }
+        } else {
+            try {
+                $exportedSuccessfully = 0;
+                $exportedWithErrors = 0;
+                foreach ($customersIds as $customerId) {
+                    $dopplerListId = $this->getRequest()->getParam('list');
 
-    public function wishlistAction()
-    {
-        $this->_initCustomer();
-        $customer = Mage::registry('current_customer');
-        if ($customer->getId()) {
-            if($itemId = (int) $this->getRequest()->getParam('delete')) {
-                try {
-                    Mage::getModel('wishlist/item')->load($itemId)
-                        ->delete();
-                }
-                catch (Exception $e) {
-                    Mage::logException($e);
-                }
-            }
-        }
+                    $usernameValue = Mage::getStoreConfig('doppler/connection/username');
+                    $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-        $this->getLayout()->getUpdate()
-            ->addHandle(strtolower($this->getFullActionName()));
-        $this->loadLayoutUpdates()->generateLayoutXml()->generateLayoutBlocks();
+                    if ($usernameValue != '' && $apiKeyValue != '') {
 
-        $this->renderLayout();
-    }
+                        // Load selected customer
+                        $customer = Mage::getModel('customer/customer')->load($customerId);
+                        $customer->setWebsiteId(Mage::app()->getWebsite()->getId());
 
-    /**
-     * Customer last view wishlist for ajax
-     *
-     */
-    public function viewWishlistAction()
-    {
-        $this->_initCustomer();
-        $this->loadLayout();
-        $this->renderLayout();
-    }
+                        // Get cURL resource
+                        $ch = curl_init();
 
-    /**
-     * [Handle and then] get a cart grid contents
-     *
-     * @return string
-     */
-    public function cartAction()
-    {
-        $this->_initCustomer();
-        $websiteId = $this->getRequest()->getParam('website_id');
+                        // Set url
+                        curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue . '/lists/' . $dopplerListId . '/subscribers');
 
-        // delete an item from cart
-        $deleteItemId = $this->getRequest()->getPost('delete');
-        if ($deleteItemId) {
-            $quote = Mage::getModel('sales/quote')
-                ->setWebsite(Mage::app()->getWebsite($websiteId))
-                ->loadByCustomer(Mage::registry('current_customer'));
-            $item = $quote->getItemById($deleteItemId);
-            if ($item && $item->getId()) {
-                $quote->removeItem($deleteItemId);
-                $quote->collectTotals()->save();
-            }
-        }
+                        // Set method
+                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 
-        $this->loadLayout();
-        $this->getLayout()->getBlock('admin.customer.view.edit.cart')->setWebsiteId($websiteId);
-        $this->renderLayout();
-    }
+                        // Set options
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-    /**
-     * Get shopping cart to view only
-     *
-     */
-    public function viewCartAction()
-    {
-        $this->_initCustomer();
-        $this->loadLayout()
-            ->getLayout()
-            ->getBlock('admin.customer.view.cart')
-            ->setWebsiteId($this->getRequest()->getParam('website_id'));
-        $this->renderLayout();
-    }
+                        // Set headers
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                                "Authorization: token " . $apiKeyValue,
+                                "Content-Type: application/json",
+                            ]
+                        );
 
-    /**
-     * Get shopping carts from all websites for specified client
-     *
-     */
-    public function cartsAction()
-    {
-        $this->_initCustomer();
-        $this->loadLayout();
-        $this->renderLayout();
-    }
+                        // Create body
+                        $body = '{ email: "' . $customer->getEmail() . '" }';
 
-    /**
-     * Get customer's product reviews list
-     *
-     */
-    public function productReviewsAction()
-    {
-        $this->_initCustomer();
-        $this->loadLayout()
-            ->getLayout()
-            ->getBlock('admin.customer.reviews')
-            ->setCustomerId(Mage::registry('current_customer')->getId())
-            ->setUseAjax(true);
-        $this->renderLayout();
-    }
+                        // Set body
+                        curl_setopt($ch, CURLOPT_POST, 1);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 
-    /**
-     * Get customer's tags list
-     *
-     */
-    public function productTagsAction()
-    {
-        $this->_initCustomer();
-        $this->loadLayout()
-            ->getLayout()
-            ->getBlock('admin.customer.tags')
-            ->setCustomerId(Mage::registry('current_customer')->getId())
-            ->setUseAjax(true);
-        $this->renderLayout();
-    }
+                        // Send the request & save response to $resp
+                        $resp = curl_exec($ch);
 
-    public function tagGridAction()
-    {
-        $this->_initCustomer();
-        $this->loadLayout();
-        $this->getLayout()->getBlock('admin.customer.tags')->setCustomerId(
-            Mage::registry('current_customer')
-        );
-        $this->renderLayout();
-    }
+                        if (!$resp) {
+                            Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                        } else {
 
-    public function validateAction()
-    {
-        $response       = new Varien_Object();
-        $response->setError(0);
-        $websiteId      = Mage::app()->getStore()->getWebsiteId();
-        $accountData    = $this->getRequest()->getPost('account');
+                            $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        $customer = Mage::getModel('customer/customer');
-        $customerId = $this->getRequest()->getParam('id');
-        if ($customerId) {
-            $customer->load($customerId);
-            $websiteId = $customer->getWebsiteId();
-        } else if (isset($accountData['website_id'])) {
-            $websiteId = $accountData['website_id'];
-        }
+                            Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                            Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
 
-        /* @var $customerForm Mage_Customer_Model_Form */
-        $customerForm = Mage::getModel('customer/form');
-        $customerForm->setEntity($customer)
-            ->setFormCode('adminhtml_customer')
-            ->setIsAjaxRequest(true)
-            ->ignoreInvisible(false)
-        ;
+                            if ($statusCode == '200') {
 
-        $data   = $customerForm->extractData($this->getRequest(), 'account');
-        $errors = $customerForm->validateData($data);
-        if ($errors !== true) {
-            foreach ($errors as $error) {
-                $this->_getSession()->addError($error);
-            }
-            $response->setError(1);
-        }
+                                // Set doppler_synced attribute to true since the customer was successfully exported
+                                if ($customer->getId() > 1) {
+                                    $customer->setDopplerSynced('1')->save();
+                                }
 
-        # additional validate email
-        if (!$response->getError()) {
-            # Trying to load customer with the same email and return error message
-            # if customer with the same email address exisits
-            $checkCustomer = Mage::getModel('customer/customer')
-                ->setWebsiteId($websiteId);
-            $checkCustomer->loadByEmail($accountData['email']);
-            if ($checkCustomer->getId() && ($checkCustomer->getId() != $customer->getId())) {
-                $response->setError(1);
-                $this->_getSession()->addError(
-                    Mage::helper('adminhtml')->__('Customer with the same email already exists.')
-                );
-            }
-        }
+                                $exportedSuccessfully++;
 
-        $addressesData = $this->getRequest()->getParam('address');
-        if (is_array($addressesData)) {
-            /* @var $addressForm Mage_Customer_Model_Form */
-            $addressForm = Mage::getModel('customer/form');
-            $addressForm->setFormCode('adminhtml_customer_address')->ignoreInvisible(false);
-            foreach (array_keys($addressesData) as $index) {
-                if ($index == '_template_') {
-                    continue;
-                }
-                $address = $customer->getAddressItemById($index);
-                if (!$address) {
-                    $address   = Mage::getModel('customer/address');
-                }
+                            } else {
+                                $responseContent = json_decode($resp, true);
+                                $exportedWithErrors++;
+                            }
+                        }
 
-                $requestScope = sprintf('address/%s', $index);
-                $formData = $addressForm->setEntity($address)
-                    ->extractData($this->getRequest(), $requestScope);
-
-                $errors = $addressForm->validateData($formData);
-                if ($errors !== true) {
-                    foreach ($errors as $error) {
-                        $this->_getSession()->addError($error);
+                        // Close request to clear up some resources
+                        curl_close($ch);
                     }
-                    $response->setError(1);
                 }
-            }
-        }
 
-        if ($response->getError()) {
-            $this->_initLayoutMessages('adminhtml/session');
-            $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
-        }
-
-        $this->getResponse()->setBody($response->toJson());
-    }
-
-    public function massSubscribeAction()
-    {
-        $customersIds = $this->getRequest()->getParam('customer');
-        if(!is_array($customersIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select customer(s).'));
-
-        } else {
-            try {
-                foreach ($customersIds as $customerId) {
-                    $customer = Mage::getModel('customer/customer')->load($customerId);
-                    $customer->setIsSubscribed(true);
-                    $customer->save();
+                if ($exportedSuccessfully) {
+                    $this->_getSession()->addSuccess($this->__('%d customer(s) successfully subscribed to the selected list', $exportedSuccessfully));
                 }
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('adminhtml')->__('Total of %d record(s) were updated.', count($customersIds))
-                );
+                if ($exportedWithErrors) {
+                    $this->_getSession()->addError($this->__('Some errors ocurred when exporting %d customer(s)', $exportedWithErrors));
+                }
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
             }
@@ -502,148 +358,9 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
-    public function massUnsubscribeAction()
-    {
-        $customersIds = $this->getRequest()->getParam('customer');
-        if(!is_array($customersIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select customer(s).'));
-        } else {
-            try {
-                foreach ($customersIds as $customerId) {
-                    $customer = Mage::getModel('customer/customer')->load($customerId);
-                    $customer->setIsSubscribed(false);
-                    $customer->save();
-                }
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('adminhtml')->__('Total of %d record(s) were updated.', count($customersIds))
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            }
-        }
-
-        $this->_redirect('*/*/index');
-    }
-
-    public function massDeleteAction()
-    {
-        $customersIds = $this->getRequest()->getParam('customer');
-        if(!is_array($customersIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select customer(s).'));
-        } else {
-            try {
-                $customer = Mage::getModel('customer/customer');
-                foreach ($customersIds as $customerId) {
-                    $customer->reset()
-                        ->load($customerId)
-                        ->delete();
-                }
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('adminhtml')->__('Total of %d record(s) were deleted.', count($customersIds))
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            }
-        }
-
-        $this->_redirect('*/*/index');
-    }
-
-    public function massAssignGroupAction()
-    {
-        $customersIds = $this->getRequest()->getParam('customer');
-        if(!is_array($customersIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select customer(s).'));
-        } else {
-            try {
-                foreach ($customersIds as $customerId) {
-                    $customer = Mage::getModel('customer/customer')->load($customerId);
-                    $customer->setGroupId($this->getRequest()->getParam('group'));
-                    $customer->save();
-                }
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('adminhtml')->__('Total of %d record(s) were updated.', count($customersIds))
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            }
-        }
-
-        $this->_redirect('*/*/index');
-    }
-
-    public function viewfileAction()
-    {
-        $file   = null;
-        $plain  = false;
-        if ($this->getRequest()->getParam('file')) {
-            // download file
-            $file   = Mage::helper('core')->urlDecode($this->getRequest()->getParam('file'));
-        } else if ($this->getRequest()->getParam('image')) {
-            // show plain image
-            $file   = Mage::helper('core')->urlDecode($this->getRequest()->getParam('image'));
-            $plain  = true;
-        } else {
-            return $this->norouteAction();
-        }
-
-        $path = Mage::getBaseDir('media') . DS . 'customer';
-
-        $ioFile = new Varien_Io_File();
-        $ioFile->open(array('path' => $path));
-        $fileName   = $ioFile->getCleanPath($path . $file);
-        $path       = $ioFile->getCleanPath($path);
-
-        if ((!$ioFile->fileExists($fileName) || strpos($fileName, $path) !== 0)
-            && !Mage::helper('core/file_storage')->processStorageFile(str_replace('/', DS, $fileName))
-        ) {
-            return $this->norouteAction();
-        }
-
-        if ($plain) {
-            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-            switch (strtolower($extension)) {
-                case 'gif':
-                    $contentType = 'image/gif';
-                    break;
-                case 'jpg':
-                    $contentType = 'image/jpeg';
-                    break;
-                case 'png':
-                    $contentType = 'image/png';
-                    break;
-                default:
-                    $contentType = 'application/octet-stream';
-                    break;
-            }
-
-            $ioFile->streamOpen($fileName, 'r');
-            $contentLength = $ioFile->streamStat('size');
-            $contentModify = $ioFile->streamStat('mtime');
-
-            $this->getResponse()
-                ->setHttpResponseCode(200)
-                ->setHeader('Pragma', 'public', true)
-                ->setHeader('Content-type', $contentType, true)
-                ->setHeader('Content-Length', $contentLength)
-                ->setHeader('Last-Modified', date('r', $contentModify))
-                ->clearBody();
-            $this->getResponse()->sendHeaders();
-
-            while (false !== ($buffer = $ioFile->streamRead())) {
-                echo $buffer;
-            }
-        } else {
-            $name = pathinfo($fileName, PATHINFO_BASENAME);
-            $this->_prepareDownloadResponse($name, array(
-                'type'  => 'filename',
-                'value' => $fileName
-            ));
-        }
-
-        exit();
-    }
-
+    /**
+     * Validate admin user permissions
+     */
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed('customer/manage');

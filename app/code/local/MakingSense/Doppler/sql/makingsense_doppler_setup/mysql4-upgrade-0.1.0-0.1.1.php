@@ -1,4 +1,11 @@
 <?php
+/**
+ * 0.1.0 - 0.1.1 upgrade installer
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
 
 $installer = $this;
 

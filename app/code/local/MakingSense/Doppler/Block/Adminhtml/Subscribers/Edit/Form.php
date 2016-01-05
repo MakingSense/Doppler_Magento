@@ -1,10 +1,21 @@
 <?php
+/**
+ * Subscribers edit form
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
+class MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
+{
 
-class MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit_Form extends Mage_Adminhtml_Block_Widget_Form {
-
-	protected $_listsArray = null;
-
-	protected function _prepareForm (){
+	/**
+	 * Prepare form before rendering HTML
+	 *
+	 * @return MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit_Form
+	 */
+	protected function _prepareForm()
+	{
 		$model = Mage::registry('subscribers_data');
 
 		if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
@@ -43,9 +54,12 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit_Form extends Mage_Adm
 				'name'      => 'email',
 				'class'		=> 'non-editable'
 			));
+			$fieldset->addField('entity_id', 'hidden', array(
+				'name' => 'entity_id',
+			));
 		}
 
-		$dopplerLists = $this->getDopplerLists();
+		$dopplerLists = Mage::helper('makingsense_doppler')->getDopplerLists();
 
 		$fieldset->addField('doppler_list', 'select', array(
 			'label'     => Mage::helper('makingsense_doppler')->__('Doppler List'),
@@ -55,12 +69,6 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit_Form extends Mage_Adm
 			'values' => $dopplerLists
 		));
 
-		if ($model->getId()){
-			$fieldset->addField('id', 'hidden', array(
-				'name' => 'id',
-            ));
-		}
-		
 		$form->setUseContainer(true);
 		$form->setValues($model->getData());
 		$this->setForm($form);
@@ -68,54 +76,4 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Edit_Form extends Mage_Adm
 		return parent::_prepareForm();
 	}
 
-	public function getDopplerLists()
-	{
-		$this->_listsArray = array();
-
-		// Get cURL resource
-		$ch = curl_init();
-
-		// Set url
-		curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/guarinogabriel@gmail.com/lists');
-
-		// Set method
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-
-		// Set options
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-		// Set headers
-		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-				"Authorization: token 75D1DFD190CDC50AE95EAEAAB661F949",
-			]
-		);
-
-		// Send the request & save response to $resp
-		$resp = curl_exec($ch);
-
-		if(!$resp) {
-			Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-		} else {
-
-			$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-			Mage::log("Response HTTP Status Code : " . $statusCode, null,'doppler.log');
-			Mage::log("Response HTTP Body : " . $resp, null,'doppler.log');
-
-			$responseContent = json_decode($resp, true);
-			$listsResponseArray = $responseContent['items'];
-
-			foreach ($listsResponseArray as $list) {
-				$fieldName = $list['name'];
-				$listId = $list['listId'];
-				$this->_listsArray[$listId] = $fieldName;
-			}
-
-		}
-
-		// Close request to clear up some resources
-		curl_close($ch);
-
-		return $this->_listsArray;
-	}
 }

@@ -1,7 +1,16 @@
 <?php
-
-class MakingSense_Doppler_Block_Adminhtml_Lists extends Mage_Adminhtml_Block_Widget_Grid_Container {
-
+/**
+ * Lists grid container
+ *
+ * @category    MakingSense
+ * @package     Doppler
+ * @author      Gabriel Guarino <guarinogabriel@gmail.com>
+ */
+class MakingSense_Doppler_Block_Adminhtml_Lists extends Mage_Adminhtml_Block_Widget_Grid_Container
+{
+	/**
+	 * Set controller, block group and labels for title and top-right button
+	 */
 	public function __construct ()
 	{
 		$this->_controller = 'adminhtml_lists';

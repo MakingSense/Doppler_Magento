@@ -6,5 +6,10 @@
                 <name>makingsense_doppler/custom.css</name>
             </action>
         </reference>
+        <reference name="menu">
+            <action method="setTemplate">
+                <template>doppler/menu.phtml</template>
+            </action>
+        </reference>
     </default>
 </layout>

@@ -71,4 +71,26 @@
 						</makingsense_doppler_setup>
 				</resources>
 		</global>
+		<frontend>
+				<events>
+						<controller_action_postdispatch_customer_account_createpost>
+								<observers>
+										<makingsense_doppler_user_registration>
+												<type>singleton</type>
+												<class>MakingSense_Doppler_Model_Observer</class>
+												<method>userRegistration</method>
+										</makingsense_doppler_user_registration>
+								</observers>
+						</controller_action_postdispatch_customer_account_createpost>
+						<sales_model_service_quote_submit_after>
+								<observers>
+										<makingsense_doppler_checkout_registration>
+												<type>singleton</type>
+												<class>MakingSense_Doppler_Model_Observer</class>
+												<method>checkoutUserRegistration</method>
+										</makingsense_doppler_checkout_registration>
+								</observers>
+						</sales_model_service_quote_submit_after>
+				</events>
+		</frontend>
 </config>

@@ -18,7 +18,7 @@ class MakingSense_Doppler_Block_Adminhtml_Defaultlist_Grid extends Mage_Adminhtm
 		$this->setFilterVisibility(false);
 		$this->setHeadersVisibility(false);
 		$this->setPagerVisibility(false);
-		$this->setEmptyText('There is no default Doppler list.');
+		$this->setEmptyText($this->__('There is no default Doppler list.'));
 		$this->setSaveParametersInSession(true);
 	}
 

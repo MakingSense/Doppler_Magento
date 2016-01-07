@@ -10,6 +10,20 @@
 class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml_Controller_Action
 {
     /**
+     * Doppler lead mapping array
+     *
+     * @var null|array
+     */
+    protected $_leadMapping = null;
+
+    /**
+     * Customer attributes from mapped fields
+     *
+     * @var null|array
+     */
+    protected $_customerAttributes = null;
+
+    /**
      * Set active menu
      */
     protected function initAction()
@@ -156,6 +170,7 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
                 $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
                 if($usernameValue != '' && $apiKeyValue != '') {
+
                     // Get cURL resource
                     $ch = curl_init();
 
@@ -170,13 +185,52 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
 
                     // Set headers
                     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                            "Authorization: token " . $apiKeyValue,
-                            "Content-Type: application/json",
-                        ]
-                    );
+                        "Authorization: token " . $apiKeyValue,
+                        "Content-Type: application/json",
+                    ]);
+
+                    // Get Doppler mapped fields from Magento
+                    $leadmapCollection = Mage::getModel('makingsense_doppler/leadmap')->getCollection();
+
+                    foreach ($leadmapCollection->getData() as $leadmap)
+                    {
+                        $this->_leadMapping[$leadmap['doppler_field_name']] = $leadmap['magento_field_name'];
+                    }
+
+                    // Load Magento customer from ID
+                    $customer = Mage::getModel('customer/customer')->load($data['entity_id']);
+
+                    // Load customer attributes from mapped fields
+                    foreach ($this->_leadMapping as $field)
+                    {
+                        $this->_customerAttributes[$field] = $customer->getData($field);
+                    }
+
+                    /* Sample body format for API (add subscriber to list)
+                     * {"email": "eeef1cba-0718-4b18-b68f-5e56adaa08b9@mailinator.com",
+                        "fields": [ {name: "FIRSTNAME", value: "First Name"},
+                                    {name: "LASTNAME", value: "Last Name"},
+                                    {name: "GENDER", value: "N"},
+                                    {name: "BIRTHDAY", value: "N"}]}
+                    */
 
                     // Create body
-                    $body = '{ email: "' . $data['email'] . '" }';
+                    $body = '{ "email": "' . $data['email'] . '", ';
+                    $body .= ' "fields": [ ';
+
+                    $mappedFieldsCount = count($this->_leadMapping);
+                    $leadMappingArrayKeys = array_keys($this->_leadMapping);
+                    $customerAttributesArrayKeys = array_keys($this->_customerAttributes);
+                    $this->_apiRequestBodyArray = array();
+
+                    for($i = 0; $i < $mappedFieldsCount; $i++)
+                    {
+                        $fieldName = $leadMappingArrayKeys[$i];
+                        $customerAttributeValue = $this->_customerAttributes[$customerAttributesArrayKeys[$i]];
+                        $body .= '{ name: "'. $fieldName .'", value: "'. $customerAttributeValue .'" }, ';
+                    }
+
+                    $body .= ']}';
 
                     // Set body
                     curl_setopt($ch, CURLOPT_POST, 1);
@@ -306,8 +360,45 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
                             ]
                         );
 
+                        // Get Doppler mapped fields from Magento
+                        $leadmapCollection = Mage::getModel('makingsense_doppler/leadmap')->getCollection();
+
+                        foreach ($leadmapCollection->getData() as $leadmap)
+                        {
+                            $this->_leadMapping[$leadmap['doppler_field_name']] = $leadmap['magento_field_name'];
+                        }
+
+                        // Load customer attributes from mapped fields
+                        foreach ($this->_leadMapping as $field)
+                        {
+                            $this->_customerAttributes[$field] = $customer->getData($field);
+                        }
+
+                        /* Sample body format for API (add subscriber to list)
+                         * {"email": "eeef1cba-0718-4b18-b68f-5e56adaa08b9@mailinator.com",
+                            "fields": [ {name: "FIRSTNAME", value: "First Name"},
+                                        {name: "LASTNAME", value: "Last Name"},
+                                        {name: "GENDER", value: "N"},
+                                        {name: "BIRTHDAY", value: "N"}]}
+                        */
+
                         // Create body
-                        $body = '{ email: "' . $customer->getEmail() . '" }';
+                        $body = '{ "email": "' . $customer->getEmail() . '", ';
+                        $body .= ' "fields": [ ';
+
+                        $mappedFieldsCount = count($this->_leadMapping);
+                        $leadMappingArrayKeys = array_keys($this->_leadMapping);
+                        $customerAttributesArrayKeys = array_keys($this->_customerAttributes);
+                        $this->_apiRequestBodyArray = array();
+
+                        for($i = 0; $i < $mappedFieldsCount; $i++)
+                        {
+                            $fieldName = $leadMappingArrayKeys[$i];
+                            $customerAttributeValue = $this->_customerAttributes[$customerAttributesArrayKeys[$i]];
+                            $body .= '{ name: "'. $fieldName .'", value: "'. $customerAttributeValue .'" }, ';
+                        }
+
+                        $body .= ']}';
 
                         // Set body
                         curl_setopt($ch, CURLOPT_POST, 1);

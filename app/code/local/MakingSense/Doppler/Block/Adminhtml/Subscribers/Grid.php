@@ -98,11 +98,11 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends Mage_Adminhtm
 		$dopplerLists = Mage::helper('makingsense_doppler')->getDopplerLists();
 
 		foreach ($dopplerLists as $dopplerList) {
-			$listIdentifier = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $dopplerList));
+			$listIdentifier = array_search($dopplerList, $dopplerLists);
 
 			$this->getMassactionBlock()->addItem($listIdentifier, array(
 				'label'    => $dopplerList,
-				'url'      => $this->getUrl('*/*/massExport', array('list' => array_search($dopplerList, $dopplerLists)))
+				'url'      => $this->getUrl('*/*/massExport', array('list' => $listIdentifier))
 			));
 		}
 

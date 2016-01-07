@@ -2,7 +2,7 @@
 <config>
 		<modules>
 				<MakingSense_Doppler>
-						<version>0.1.3</version>
+						<version>0.1.4</version>
 				</MakingSense_Doppler>
 		</modules>
 		<admin>
@@ -59,6 +59,9 @@
 										<doppler_lists>
 												<table>doppler_lists</table>
 										</doppler_lists>
+										<doppler_defaultlist>
+												<table>doppler_defaultlist</table>
+										</doppler_defaultlist>
 								</entities>
 						</makingsense_doppler_resource>
 				</models>

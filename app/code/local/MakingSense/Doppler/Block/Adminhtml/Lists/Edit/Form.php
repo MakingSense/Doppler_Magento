@@ -35,6 +35,12 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 			'name'      => 'name',
 		));
 
+		$fieldset->addField('default_list', 'checkbox', array(
+			'label'     => Mage::helper('makingsense_doppler')->__('Default List'),
+			'required'  => false,
+			'name'      => 'default_list',
+		));
+
 		if ($this->getRequest()->getParam('id'))
 		{
 			$fieldset->addField('list_id', 'text', array(
@@ -50,7 +56,7 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 				'required'  => false,
 				'readonly' => true,
 				'name'      => 'creation_date',
-				'class'		=> 'non-cleditable'
+				'class'		=> 'non-editable'
 			));
 
 			$fieldset->addField('subscribers_count', 'text', array(

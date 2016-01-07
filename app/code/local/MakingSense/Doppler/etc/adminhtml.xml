@@ -17,6 +17,10 @@
 										<title>Lead Mapping</title>
 										<action>adminhtml/leadmap</action>
 								</lead_mapping>
+								<defaultlist translate="title" module="makingsense_doppler">
+										<title>Default Doppler List</title>
+										<action>adminhtml/defaultlist</action>
+								</defaultlist>
 								<api_connection translate="title" module="makingsense_doppler">
 										<title>API Connection</title>
 										<action>adminhtml/system_config/edit/section/doppler</action>

@@ -165,110 +165,20 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
 
         if ($data) {
             try {
+                // Load customer
+                $customer = Mage::getModel('customer/customer');
+                $customer->setWebsiteId(Mage::app()->getWebsite()->getId());
+                $customer->load($data['entity_id']);
 
-                $usernameValue = Mage::getStoreConfig('doppler/connection/username');
-                $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
+                // Export customer to Doppler
+                $wasCustomerSubscribed = Mage::helper('makingsense_doppler')->exportCustomerToDoppler($customer, $data['doppler_list']);
 
-                if($usernameValue != '' && $apiKeyValue != '') {
-
-                    // Get cURL resource
-                    $ch = curl_init();
-
-                    // Set url
-                    curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue . '/lists/' . $data['doppler_list'] . '/subscribers');
-
-                    // Set method
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-
-                    // Set options
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-                    // Set headers
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        "Authorization: token " . $apiKeyValue,
-                        "Content-Type: application/json",
-                    ]);
-
-                    // Get Doppler mapped fields from Magento
-                    $leadmapCollection = Mage::getModel('makingsense_doppler/leadmap')->getCollection();
-
-                    foreach ($leadmapCollection->getData() as $leadmap)
-                    {
-                        $this->_leadMapping[$leadmap['doppler_field_name']] = $leadmap['magento_field_name'];
-                    }
-
-                    // Load Magento customer from ID
-                    $customer = Mage::getModel('customer/customer')->load($data['entity_id']);
-
-                    // Load customer attributes from mapped fields
-                    foreach ($this->_leadMapping as $field)
-                    {
-                        $this->_customerAttributes[$field] = $customer->getData($field);
-                    }
-
-                    /* Sample body format for API (add subscriber to list)
-                     * {"email": "eeef1cba-0718-4b18-b68f-5e56adaa08b9@mailinator.com",
-                        "fields": [ {name: "FIRSTNAME", value: "First Name"},
-                                    {name: "LASTNAME", value: "Last Name"},
-                                    {name: "GENDER", value: "N"},
-                                    {name: "BIRTHDAY", value: "N"}]}
-                    */
-
-                    // Create body
-                    $body = '{ "email": "' . $data['email'] . '", ';
-                    $body .= ' "fields": [ ';
-
-                    $mappedFieldsCount = count($this->_leadMapping);
-                    $leadMappingArrayKeys = array_keys($this->_leadMapping);
-                    $customerAttributesArrayKeys = array_keys($this->_customerAttributes);
-                    $this->_apiRequestBodyArray = array();
-
-                    for($i = 0; $i < $mappedFieldsCount; $i++)
-                    {
-                        $fieldName = $leadMappingArrayKeys[$i];
-                        $customerAttributeValue = $this->_customerAttributes[$customerAttributesArrayKeys[$i]];
-                        $body .= '{ name: "'. $fieldName .'", value: "'. $customerAttributeValue .'" }, ';
-                    }
-
-                    $body .= ']}';
-
-                    // Set body
-                    curl_setopt($ch, CURLOPT_POST, 1);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-
-                    // Send the request & save response to $resp
-                    $resp = curl_exec($ch);
-
-                    if (!$resp) {
-                        Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                    } else {
-
-                        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                        Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                        Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                        if ($statusCode == '200') {
-                            $this->_getSession()->addSuccess($this->__('The customer has been subscribed to the selected list'));
-
-                            // Set doppler_synced attribute to true since the customer was successfully exported
-                            $customer = Mage::getModel('customer/customer');
-                            $customer->setWebsiteId(Mage::app()->getWebsite()->getId());
-                            $customer->load($data['entity_id']);
-                            if($customer->getId() > 1){
-                                $customer->setDopplerSynced('1')->save();
-                            }
-
-                        } else {
-                            $responseContent = json_decode($resp, true);
-                            $this->_getSession()->addError($this->__('The following errors occurred processing your request: ' . $responseContent['title']));
-                        }
-                    }
-
-                    // Close request to clear up some resources
-                    curl_close($ch);
+                if ($wasCustomerSubscribed)
+                {
+                    Mage::getSingleton('core/session')->addSuccess($this->__('The customer has been subscribed to the selected list'));
+                } else {
+                    Mage::getSingleton('core/session')->addError($this->__('There has been an error exporting the customer to Doppler'));
                 }
-
             } catch (Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
             }
@@ -328,113 +238,23 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
         } else {
             try {
                 $exportedSuccessfully = 0;
-                $exportedWithErrors = 0;
                 foreach ($customersIds as $customerId) {
                     $dopplerListId = $this->getRequest()->getParam('list');
 
-                    $usernameValue = Mage::getStoreConfig('doppler/connection/username');
-                    $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
+                    // Load selected customer
+                    $customer = Mage::getModel('customer/customer')->load($customerId);
+                    $customer->setWebsiteId(Mage::app()->getWebsite()->getId());
 
-                    if ($usernameValue != '' && $apiKeyValue != '') {
+                    // Export customer to Doppler
+                    $wasCustomerExported = Mage::helper('makingsense_doppler')->exportCustomerToDoppler($customer, $dopplerListId);
 
-                        // Load selected customer
-                        $customer = Mage::getModel('customer/customer')->load($customerId);
-                        $customer->setWebsiteId(Mage::app()->getWebsite()->getId());
-
-                        // Get cURL resource
-                        $ch = curl_init();
-
-                        // Set url
-                        curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue . '/lists/' . $dopplerListId . '/subscribers');
-
-                        // Set method
-                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-
-                        // Set options
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-                        // Set headers
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                                "Authorization: token " . $apiKeyValue,
-                                "Content-Type: application/json",
-                            ]
-                        );
-
-                        // Get Doppler mapped fields from Magento
-                        $leadmapCollection = Mage::getModel('makingsense_doppler/leadmap')->getCollection();
-
-                        foreach ($leadmapCollection->getData() as $leadmap)
-                        {
-                            $this->_leadMapping[$leadmap['doppler_field_name']] = $leadmap['magento_field_name'];
-                        }
-
-                        // Load customer attributes from mapped fields
-                        foreach ($this->_leadMapping as $field)
-                        {
-                            $this->_customerAttributes[$field] = $customer->getData($field);
-                        }
-
-                        /* Sample body format for API (add subscriber to list)
-                         * {"email": "eeef1cba-0718-4b18-b68f-5e56adaa08b9@mailinator.com",
-                            "fields": [ {name: "FIRSTNAME", value: "First Name"},
-                                        {name: "LASTNAME", value: "Last Name"},
-                                        {name: "GENDER", value: "N"},
-                                        {name: "BIRTHDAY", value: "N"}]}
-                        */
-
-                        // Create body
-                        $body = '{ "email": "' . $customer->getEmail() . '", ';
-                        $body .= ' "fields": [ ';
-
-                        $mappedFieldsCount = count($this->_leadMapping);
-                        $leadMappingArrayKeys = array_keys($this->_leadMapping);
-                        $customerAttributesArrayKeys = array_keys($this->_customerAttributes);
-                        $this->_apiRequestBodyArray = array();
-
-                        for($i = 0; $i < $mappedFieldsCount; $i++)
-                        {
-                            $fieldName = $leadMappingArrayKeys[$i];
-                            $customerAttributeValue = $this->_customerAttributes[$customerAttributesArrayKeys[$i]];
-                            $body .= '{ name: "'. $fieldName .'", value: "'. $customerAttributeValue .'" }, ';
-                        }
-
-                        $body .= ']}';
-
-                        // Set body
-                        curl_setopt($ch, CURLOPT_POST, 1);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-
-                        // Send the request & save response to $resp
-                        $resp = curl_exec($ch);
-
-                        if (!$resp) {
-                            Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                        } else {
-
-                            $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                            Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                            Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                            if ($statusCode == '200') {
-
-                                // Set doppler_synced attribute to true since the customer was successfully exported
-                                if ($customer->getId() > 1) {
-                                    $customer->setDopplerSynced('1')->save();
-                                }
-
-                                $exportedSuccessfully++;
-
-                            } else {
-                                $responseContent = json_decode($resp, true);
-                                $exportedWithErrors++;
-                            }
-                        }
-
-                        // Close request to clear up some resources
-                        curl_close($ch);
+                    if ($wasCustomerExported)
+                    {
+                        $exportedSuccessfully++;
                     }
                 }
+
+                $exportedWithErrors = count($customersIds) - $exportedSuccessfully;
 
                 if ($exportedSuccessfully) {
                     $this->_getSession()->addSuccess($this->__('%d customer(s) successfully subscribed to the selected list', $exportedSuccessfully));

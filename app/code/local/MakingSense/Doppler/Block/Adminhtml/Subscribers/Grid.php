@@ -178,7 +178,8 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends Mage_Adminhtm
 			'type'		=> 'options',
 			'width'     => '80px',
 			'filter'     => false,
-			'options' 	=>  array('1' => 'Yes', '0' => 'No', '' => 'No')
+			'options' 	=>  array('1' => 'Yes', '0' => 'No', '' => 'No'),
+			'column_css_class' => 'doppler-highlighted'
 		),'website');
 
 		$this->addExportType('*/*/exportCsv', Mage::helper('customer')->__('CSV'));

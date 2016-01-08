@@ -25,21 +25,6 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
      */
     public function indexAction()
     {
-        // Check if there is a default Doppler list
-        $dopplerLists = Mage::getModel('makingsense_doppler/lists')->getCollection();
-        $defaultlistExist = false;
-        foreach ($dopplerLists as $dopplerList)
-        {
-            $isDefault = $dopplerList->getData('default_list');
-
-            if ($isDefault) {
-                $defaultlistExist = true;
-            }
-        }
-        if (!$defaultlistExist) {
-            Mage::getSingleton('core/session')->addError($this->__('There is no Doppler default list. Please, choose a list and set that list as default.'));
-        }
-
         if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
             Mage::getSingleton('core/session')->addError($this->__('The Doppler API is not currently available, please try later'));
         } else {

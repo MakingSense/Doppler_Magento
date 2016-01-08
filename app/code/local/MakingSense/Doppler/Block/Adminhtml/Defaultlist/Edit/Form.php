@@ -20,18 +20,28 @@ class MakingSense_Doppler_Block_Adminhtml_Defaultlist_Edit_Form extends Mage_Adm
 
 		$form = new Varien_Data_Form(array(
 			'id' => 'edit_form',
-			'action' => $this->getUrl("*/*/save", array('listId' => $this->getRequest()->getParam('listId'))),
+			'action' => $this->getUrl("*/*/save", array('id' => $this->getRequest()->getParam('id'))),
 			'method' => 'post'
 		));
 
-        $fieldset = $form->addFieldset('defaultlist_form', array(
-			'legend' => Mage::helper('makingsense_doppler')->__('List information')
+		$fieldset = $form->addFieldset('defaultlist_form', array(
+			'legend' => Mage::helper('makingsense_doppler')->__('Default List')
 		));
 
-		if ($model->getListId())
+		$dopplerLists = Mage::helper('makingsense_doppler')->getDopplerLists();
+
+		$fieldset->addField('doppler_list_id', 'select', array(
+			'label'     => Mage::helper('makingsense_doppler')->__('Doppler List Name'),
+			'class'     => 'required-entry',
+			'required'  => true,
+			'name'      => 'doppler_list_id',
+			'values' => $dopplerLists
+		));
+
+		if ($model->getId())
 		{
-			$fieldset->addField('listId', 'hidden', array(
-				'name' => 'listId',
+			$fieldset->addField('id', 'hidden', array(
+				'name' => 'id',
             ));
 		}
 

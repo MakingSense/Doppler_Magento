@@ -3,7 +3,6 @@ class MakingSense_Doppler_Model_Resource_Doppler_Defaultlist extends Mage_Core_M
 {
 	public function _construct()
 	{
-		$this->_init('makingsense_doppler/doppler_defaultlist', 'listId');
+		$this->_init('makingsense_doppler/doppler_defaultlist', 'id');
 	}
-
 }

@@ -37,22 +37,28 @@ class MakingSense_Doppler_Block_Adminhtml_Defaultlist_Grid extends Mage_Adminhtm
 	 * Set columns for grid
 	 */
 	protected function _prepareColumns (){
-		$this->addColumn('list_id', array(
+		$this->addColumn('listId', array(
 			'header' => Mage::helper('makingsense_doppler')->__('List ID'),
-			'index'  => 'list_id',
+			'index'  => 'listId',
 			'filter' => false,
 			'width'  => '90px'
 		));
 		$this->addColumn('name', array(
 			'header' => Mage::helper('makingsense_doppler')->__('List Name'),
-			'filter'     => false,
+			'filter' => false,
 			'index'  => 'name'
 		));
-		$this->addColumn('last_import', array(
-			'header' => Mage::helper('makingsense_doppler')->__('Last Import Date'),
-			'index'  => 'last_import',
-			'filter'     => false,
-			'width'  => '200px'
+		$this->addColumn('list_status', array(
+			'header' => Mage::helper('makingsense_doppler')->__('Status'),
+			'index'  => 'list_status',
+			'filter' => false,
+			'width'  => '600px',
+			'align'  => 'center',
+			'type'	 => 'options',
+			'options' 	=>  array(
+								MakingSense_Doppler_Helper_Data::DOPPLER_LIST_STATUS_DELETED => $this->__('The list has been deleted and the new customers auto-import process has been disabled. Please choose a new list.'),
+                                MakingSense_Doppler_Helper_Data::DOPPLER_LIST_STATUS_ENABLED => $this->__('New customers auto-import enabled')
+							)
 		));
 	}
 

@@ -14,10 +14,11 @@ $installer->startSetup();
 if (!$installer->tableExists($installer->getTable('makingsense_doppler/doppler_defaultlist'))) {
 	$installer->run("
 		CREATE TABLE `{$installer->getTable('makingsense_doppler/doppler_defaultlist')}` (
+		  `id` int(11) unsigned NOT NULL,
 		  `listId` int(11) unsigned NOT NULL,
 		  `name` varchar(255) DEFAULT NULL,
-		  `last_import` datetime DEFAULT NULL,
-		  PRIMARY KEY (`listId`)
+		  `list_status` varchar(255) DEFAULT NULL,
+		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 	");
 }

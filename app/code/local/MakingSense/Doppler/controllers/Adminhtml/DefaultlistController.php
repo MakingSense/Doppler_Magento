@@ -25,6 +25,95 @@ class MakingSense_Doppler_Adminhtml_DefaultlistController extends Mage_Adminhtml
      */
     public function indexAction()
     {
+        if (!Mage::helper('makingsense_doppler')->testAPIConnection()) {
+            Mage::getSingleton('core/session')->addError($this->__('The Doppler API is not currently available, please try later'));
+        } else {
+
+            // If there is a default list, then validate its status is Doppler
+            $defaultListCollection = Mage::getModel('makingsense_doppler/defaultlist')->getCollection();
+
+            if ($defaultListCollection->getData() > 0) {
+                Mage::log($defaultListCollection->getData(), null,'defaultlist.log');
+                $listId = 0;
+
+                foreach ($defaultListCollection as $defaultList)
+                {
+                    $listId = $defaultList->getData('listId');
+                }
+
+                if ($listId != 0)
+                {
+                    $usernameValue = Mage::getStoreConfig('doppler/connection/username');
+                    $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
+
+                    if($usernameValue != '' && $apiKeyValue != '') {
+                        // Get cURL resource
+                        $ch = curl_init();
+
+                        Mage::log($listId, null,'listId.log');
+
+                        // Set url
+                        curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue . '/lists/' . $listId);
+
+                        // Set method
+                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+                        // Set options
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+                        // Set headers
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                                "Authorization: token " . $apiKeyValue,
+                            ]
+                        );
+
+                        // Send the request & save response to $resp
+                        $resp = curl_exec($ch);
+
+                        if (!$resp) {
+                            Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+                        } else {
+
+                            $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                            Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
+                            Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
+
+                            $responseContent = json_decode($resp, true);
+
+                            if ($statusCode == '200') {
+                                $model = Mage::getModel('makingsense_doppler/defaultlist');
+
+                                // Remove the old list information
+                                foreach ($model->getCollection() as $list) {
+                                    $model->load($list->getId())->delete();
+                                }
+
+                                $data['name'] = $responseContent['name'];
+                                $data['listId'] = $responseContent['listId'];
+
+                                // If the list has been deleted, then let the user know about that
+                                if ($responseContent['currentStatus'] == MakingSense_Doppler_Helper_Data::DOPPLER_LIST_STATUS_DELETED) {
+                                    $data['list_status'] = MakingSense_Doppler_Helper_Data::DOPPLER_LIST_STATUS_DELETED;
+                                } else {
+                                    $data['list_status'] = MakingSense_Doppler_Helper_Data::DOPPLER_LIST_STATUS_ENABLED;
+                                }
+
+                                $model->setData($data);
+                                $model->save();
+                            } else {
+                                $this->_getSession()->addError($this->__('The following errors occurred retrieving your default list: %s', $responseContent['title']));
+                            }
+                        }
+
+                        // Close request to clear up some resources
+                        curl_close($ch);
+                    }
+                }
+            }
+
+        }
+
         $this->initAction()
             ->_addContent($this->getLayout()->createBlock('makingsense_doppler/adminhtml_defaultlist'))
             ->renderLayout();
@@ -94,6 +183,28 @@ class MakingSense_Doppler_Adminhtml_DefaultlistController extends Mage_Adminhtml
     public function saveAction()
     {
         $data = $this->getRequest()->getPost();
+
+        if ($data){
+            try {
+                $model = Mage::getModel('makingsense_doppler/defaultlist');
+
+                // First, remove the previous default list
+                foreach ($model->getCollection() as $list) {
+                    $model->load($list->getId())->delete();
+                }
+
+                // Then save the new default list
+                $listData = array();
+                $listData['listId'] = $data['doppler_list_id'];
+
+                $model->setData($listData);
+                $model->save();
+
+                $this->_getSession()->addSuccess($this->__('Saved'));
+            } catch (Exception $e){
+                $this->_getSession()->addError($e->getMessage());
+            }
+        }
 
         $this->_redirect("*/*/");
     }

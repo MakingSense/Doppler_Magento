@@ -14,8 +14,19 @@ class MakingSense_Doppler_Model_Observer
     public function userRegistration()
     {
         // If the customer is logged in after the observer dispatch, that means that the customer was successfully registered
-        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-            Mage::log(Mage::getSingleton('customer/session')->getCustomer()->getData(), null,'registered-customer.log');
+        if (Mage::getSingleton('customer/session')->isLoggedIn())
+        {
+            // Get customer
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+
+            // Get default Doppler list
+            $defaultDopplerList = Mage::helper('makingsense_doppler')->getDefaultDopplerList();
+
+            if ($defaultDopplerList)
+            {
+                // Export customer to Doppler
+                Mage::helper('makingsense_doppler')->exportCustomerToDoppler($customer, $defaultDopplerList);
+            }
         }
     }
 
@@ -33,8 +44,16 @@ class MakingSense_Doppler_Model_Observer
             return;
         }
 
-        // Get customer data
-        $customer = $quote->getCustomer()->getData();
-        Mage::log($customer, null,'debug.log');
+        // Get customer
+        $customer = $quote->getCustomer();
+
+        // Get default Doppler list
+        $defaultDopplerList = Mage::helper('makingsense_doppler')->getDefaultDopplerList();
+
+        if ($defaultDopplerList)
+        {
+            // Export customer to Doppler
+            Mage::helper('makingsense_doppler')->exportCustomerToDoppler($customer, $defaultDopplerList);
+        }
     }
 }

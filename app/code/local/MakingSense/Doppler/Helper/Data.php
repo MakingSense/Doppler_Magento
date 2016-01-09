@@ -53,7 +53,8 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
 
         $apiAvailable = false;
 
-        if($usernameValue != '' && $apiKeyValue != '') {
+        if($usernameValue != '' && $apiKeyValue != '')
+        {
             // Get cURL resource
             $ch = curl_init();
 
@@ -75,18 +76,14 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
             // Send the request & save response to $resp
             $resp = curl_exec($ch);
 
-            if (!$resp) {
-                Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-            } else {
-
+            if ($resp)
+            {
                 $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-                if ($statusCode == '200') {
+                if ($statusCode == '200')
+                {
                     $apiAvailable = true;
                 }
-
-                Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
             }
 
             // Close request to clear up some resources
@@ -112,7 +109,8 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
         $usernameValue = Mage::getStoreConfig('doppler/connection/username');
         $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-        if($usernameValue != '' && $apiKeyValue != '') {
+        if($usernameValue != '' && $apiKeyValue != '')
+        {
             // Get cURL resource
             $ch = curl_init();
 
@@ -134,12 +132,14 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
             // Get Doppler mapped fields from Magento
             $leadmapCollection = Mage::getModel('makingsense_doppler/leadmap')->getCollection();
 
-            foreach ($leadmapCollection->getData() as $leadmap) {
+            foreach ($leadmapCollection->getData() as $leadmap)
+            {
                 $this->_leadMapping[$leadmap['doppler_field_name']] = $leadmap['magento_field_name'];
             }
 
             // Load customer attributes from mapped fields
-            foreach ($this->_leadMapping as $field) {
+            foreach ($this->_leadMapping as $field)
+            {
                 $this->_customerAttributes[$field] = $customer->getData($field);
             }
 
@@ -173,16 +173,13 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
 
             // Send the request & save response to $resp
             $resp = curl_exec($ch);
-            if (!$resp) {
-                Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-            } else {
 
+            if ($resp)
+            {
                 $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-                Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                if ($statusCode == '200') {
+                if ($statusCode == '200')
+                {
                     // Set doppler_synced attribute to true since the customer was successfully exported
                     if($customer->getId() > 1){
                         $customer->setDopplerSynced('1')->save();
@@ -231,23 +228,16 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
             // Send the request & save response to $resp
             $resp = curl_exec($ch);
 
-            if(!$resp) {
-                Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-            } else {
-
-                $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                Mage::log("Response HTTP Status Code : " . $statusCode, null,'doppler.log');
-                Mage::log("Response HTTP Body : " . $resp, null,'doppler.log');
-
+            if($resp)
+            {
                 $responseContent = json_decode($resp, true);
                 $fieldsResponseArray = $responseContent['items'];
 
-                foreach ($fieldsResponseArray as $field) {
+                foreach ($fieldsResponseArray as $field)
+                {
                     $fieldName = $field['name'];
                     $this->_fieldsArray[$fieldName] = $fieldName;
                 }
-
             }
 
             // Close request to clear up some resources
@@ -289,19 +279,13 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
             // Send the request & save response to $resp
             $resp = curl_exec($ch);
 
-            if(!$resp) {
-                Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-            } else {
-
-                $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                Mage::log("Response HTTP Status Code : " . $statusCode, null,'doppler.log');
-                Mage::log("Response HTTP Body : " . $resp, null,'doppler.log');
-
+            if($resp)
+            {
                 $responseContent = json_decode($resp, true);
                 $listsResponseArray = $responseContent['items'];
 
-                foreach ($listsResponseArray as $list) {
+                foreach ($listsResponseArray as $list)
+                {
                     $fieldName = $list['name'];
                     $listId = $list['listId'];
                     $this->_listsArray[$listId] = $fieldName;

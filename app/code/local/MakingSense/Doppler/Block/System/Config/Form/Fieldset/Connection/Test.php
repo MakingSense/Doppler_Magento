@@ -33,9 +33,11 @@ class MakingSense_Doppler_Block_System_Config_Form_Fieldset_Connection_Test exte
         $usernameValue = Mage::getStoreConfig('doppler/connection/username');
         $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-        if($usernameValue != '' && $apiKeyValue != '') {
+        if($usernameValue != '' && $apiKeyValue != '')
+        {
 
-            if (Mage::helper('makingsense_doppler')->testAPIConnection()) {
+            if (Mage::helper('makingsense_doppler')->testAPIConnection())
+            {
                 // Get cURL resource
                 $ch = curl_init();
 
@@ -57,15 +59,9 @@ class MakingSense_Doppler_Block_System_Config_Form_Fieldset_Connection_Test exte
                 // Send the request & save response to $resp
                 $resp = curl_exec($ch);
 
-                if(!$resp) {
-                    Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                } else {
-
+                if($resp) {
                     $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                     $block->setStatusCode($statusCode);
-
-                    Mage::log("Response HTTP Status Code : " . $statusCode, null,'doppler.log');
-                    Mage::log("Response HTTP Body : " . $resp, null,'doppler.log');
                 }
 
                 // Close request to clear up some resources

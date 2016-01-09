@@ -32,7 +32,8 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
             $usernameValue = Mage::getStoreConfig('doppler/connection/username');
             $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-            if($usernameValue != '' && $apiKeyValue != '') {
+            if($usernameValue != '' && $apiKeyValue != '')
+            {
                 // Get cURL resource
                 $ch = curl_init();
 
@@ -54,14 +55,9 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                 // Send the request & save response to $resp
                 $resp = curl_exec($ch);
 
-                if (!$resp) {
-                    Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                } else {
-
+                if ($resp)
+                {
                     $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                    Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                    Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
 
                     $responseContent = json_decode($resp, true);
 
@@ -70,7 +66,8 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                         $model = Mage::getModel('makingsense_doppler/lists');
 
                         // First, remove the old Doppler lists
-                        foreach ($model->getCollection() as $list) {
+                        foreach ($model->getCollection() as $list)
+                        {
                             $model->load($list->getId())->delete();
                         }
 
@@ -92,7 +89,8 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                             $model->save();
                         }
 
-                    } else {
+                    } else
+                    {
                         $this->_getSession()->addError($this->__('The following errors occurred creating your list: %s', $responseContent['title']));
                     }
                 }
@@ -182,18 +180,15 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                     // Send the request & save response to $resp
                     $resp = curl_exec($ch);
 
-                    if(!$resp) {
-                        Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                    } else {
-
+                    if($resp)
+                    {
                         $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-                        Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                        Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                        if ($statusCode == '200') {
+                        if ($statusCode == '200')
+                        {
                             $this->_getSession()->addSuccess($this->__("The list '%s' has been successfully removed", $list->getName()));
-                        } else {
+                        } else
+                        {
                             $responseContent = json_decode($resp, true);
                             $this->_getSession()->addError($this->__('The following errors occurred removing your list: ' . $responseContent['title']));
                         }
@@ -220,14 +215,17 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
     {
         $data = $this->getRequest()->getPost();
 
-        if ($data) {
+        if ($data)
+        {
             // If we are editing a list, then save the new list name and check if the edited list should be the default list
-            if (array_key_exists('id', $data)) {
+            if (array_key_exists('id', $data))
+            {
                 try {
                     $usernameValue = Mage::getStoreConfig('doppler/connection/username');
                     $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-                    if($usernameValue != '' && $apiKeyValue != '') {
+                    if($usernameValue != '' && $apiKeyValue != '')
+                    {
                         // Get cURL resource
                         $ch = curl_init();
 
@@ -257,16 +255,12 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                         // Send the request & save response to $resp
                         $resp = curl_exec($ch);
 
-                        if (!$resp) {
-                            Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                        } else {
-
+                        if ($resp)
+                        {
                             $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-                            Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                            Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                            if ($statusCode == '200') {
+                            if ($statusCode == '200')
+                            {
                                 $this->_getSession()->addSuccess($this->__('The changes have been saved'));
 
                                 // If the new list has been marked as default, then update default list in Magento
@@ -298,7 +292,8 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                                         }
                                     }
                                 }
-                            } else {
+                            } else
+                            {
                                 $responseContent = json_decode($resp, true);
                                 $this->_getSession()->addError($this->__('The following errors occurred creating your list: ' . $responseContent['title']));
                             }
@@ -313,13 +308,16 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                 }
             }
             // Else, save the new list
-            else {
-                try {
+            else
+            {
+                try
+                {
 
                     $usernameValue = Mage::getStoreConfig('doppler/connection/username');
                     $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-                    if($usernameValue != '' && $apiKeyValue != '') {
+                    if($usernameValue != '' && $apiKeyValue != '')
+                    {
                         // Get cURL resource
                         $ch = curl_init();
 
@@ -342,8 +340,6 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                         // Create body
                         $body = '{ name: "' . $data['name'] . '" }';
 
-                        Mage::log($body, null, 'body.log');
-
                         // Set body
                         curl_setopt($ch, CURLOPT_POST, 1);
                         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
@@ -351,16 +347,12 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                         // Send the request & save response to $resp
                         $resp = curl_exec($ch);
 
-                        if (!$resp) {
-                            Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                        } else {
-
+                        if ($resp)
+                        {
                             $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-                            Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                            Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                            if ($statusCode == '201') {
+                            if ($statusCode == '201')
+                            {
                                 $this->_getSession()->addSuccess($this->__('The list has been successfully created'));
 
                                 // If the new list has been marked as default, then update default list in Magento
@@ -410,19 +402,24 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
     public function massDeleteAction()
     {
         $data = $this->getRequest()->getParam('lists');
-        if (!is_array($data)){
+        if (!is_array($data))
+        {
             $this->_getSession()->addError(
                 $this->__("Please select at least one record")
             );
-        } else {
-            try {
-                foreach ($data as $id){
+        } else
+        {
+            try
+            {
+                foreach ($data as $id)
+                {
                     $list = Mage::getModel('makingsense_doppler/lists')->load($id);
 
                     $usernameValue = Mage::getStoreConfig('doppler/connection/username');
                     $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-                    if($usernameValue != '' && $apiKeyValue != '') {
+                    if($usernameValue != '' && $apiKeyValue != '')
+                    {
                         // Get cURL resource
                         $ch = curl_init();
 
@@ -442,20 +439,15 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
                             ]
                         );
 
-
                         // Send the request & save response to $resp
                         $resp = curl_exec($ch);
 
-                        if (!$resp) {
-                            Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                        } else {
-
+                        if ($resp)
+                        {
                             $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-                            Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                            Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
-
-                            if ($statusCode == '200') {
+                            if ($statusCode == '200')
+                            {
                                 $this->_getSession()->addSuccess($this->__("The list '%s' has been successfully removed", $list->getName()));
                             } else {
                                 $responseContent = json_decode($resp, true);

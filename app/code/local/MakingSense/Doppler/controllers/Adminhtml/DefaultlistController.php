@@ -45,7 +45,8 @@ class MakingSense_Doppler_Adminhtml_DefaultlistController extends Mage_Adminhtml
                     $usernameValue = Mage::getStoreConfig('doppler/connection/username');
                     $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
 
-                    if($usernameValue != '' && $apiKeyValue != '') {
+                    if($usernameValue != '' && $apiKeyValue != '')
+                    {
                         // Get cURL resource
                         $ch = curl_init();
 
@@ -67,18 +68,14 @@ class MakingSense_Doppler_Adminhtml_DefaultlistController extends Mage_Adminhtml
                         // Send the request & save response to $resp
                         $resp = curl_exec($ch);
 
-                        if (!$resp) {
-                            Mage::log('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
-                        } else {
-
+                        if ($resp)
+                        {
                             $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                            Mage::log("Response HTTP Status Code : " . $statusCode, null, 'doppler.log');
-                            Mage::log("Response HTTP Body : " . $resp, null, 'doppler.log');
 
                             $responseContent = json_decode($resp, true);
 
-                            if ($statusCode == '200') {
+                            if ($statusCode == '200')
+                            {
                                 $model = Mage::getModel('makingsense_doppler/defaultlist');
 
                                 // Remove the old list information

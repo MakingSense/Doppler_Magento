@@ -35,10 +35,15 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 			'name'      => 'name',
 		));
 
+		$isDefaultList = Mage::helper('makingsense_doppler')->isDefaultList($this->getRequest()->getParam('id'));
+
 		$fieldset->addField('default_list', 'checkbox', array(
 			'label'     => Mage::helper('makingsense_doppler')->__('Default List'),
 			'required'  => false,
 			'name'      => 'default_list',
+			'value'		=> $isDefaultList,
+			'checked'	=> ($isDefaultList) ? 'checked' : '',
+			'onclick'   => 'this.value = this.checked ? 1 : 0;'
 		));
 
 		if ($this->getRequest()->getParam('id'))
@@ -83,6 +88,5 @@ class MakingSense_Doppler_Block_Adminhtml_Lists_Edit_Form extends Mage_Adminhtml
 		return parent::_prepareForm();
 
 	}
-
 
 }

@@ -33,7 +33,6 @@ class MakingSense_Doppler_Adminhtml_DefaultlistController extends Mage_Adminhtml
             $defaultListCollection = Mage::getModel('makingsense_doppler/defaultlist')->getCollection();
 
             if ($defaultListCollection->getData() > 0) {
-                Mage::log($defaultListCollection->getData(), null,'defaultlist.log');
                 $listId = 0;
 
                 foreach ($defaultListCollection as $defaultList)
@@ -49,8 +48,6 @@ class MakingSense_Doppler_Adminhtml_DefaultlistController extends Mage_Adminhtml
                     if($usernameValue != '' && $apiKeyValue != '') {
                         // Get cURL resource
                         $ch = curl_init();
-
-                        Mage::log($listId, null,'listId.log');
 
                         // Set url
                         curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue . '/lists/' . $listId);

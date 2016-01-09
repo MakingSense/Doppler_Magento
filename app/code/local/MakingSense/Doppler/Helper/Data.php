@@ -335,4 +335,29 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
         return $defaultDopplerList;
     }
 
+    /**
+     * Check if Doppler list is the default list
+     *
+     * @param int $listId
+     * @return int
+     */
+    public function isDefaultList($listId)
+    {
+        if ($listId)
+        {
+            $list = Mage::getModel('makingsense_doppler/lists')->load($listId);
+            $dopplerListId = $list->getListId();
+
+            $defaultListCollection = Mage::getModel('makingsense_doppler/defaultlist')->getCollection();
+            foreach ($defaultListCollection as $defaultList)
+            {
+                if ($dopplerListId == $defaultList->getData('listId'))
+                {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
 }

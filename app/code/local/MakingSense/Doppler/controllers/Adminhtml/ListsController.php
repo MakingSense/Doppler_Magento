@@ -268,6 +268,36 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
 
                             if ($statusCode == '200') {
                                 $this->_getSession()->addSuccess($this->__('The changes have been saved'));
+
+                                // If the new list has been marked as default, then update default list in Magento
+                                if (isset($data['default_list']))
+                                {
+                                    $model = Mage::getModel('makingsense_doppler/defaultlist');
+
+                                    // Remove the old list information
+                                    foreach ($model->getCollection() as $list) {
+                                        $model->load($list->getId())->delete();
+                                    }
+
+                                    $newDefaultList = array();
+
+                                    $newDefaultList['name'] = $data['name'];
+                                    $newDefaultList['listId'] = $data['list_id'];
+
+                                    $model->setData($newDefaultList);
+                                    $model->save();
+                                } else {
+                                    // If not, check if the current list was the default list and remove it if that was the case
+                                    $isDefaultList = Mage::helper('makingsense_doppler')->isDefaultList($data['id']);
+
+                                    if ($isDefaultList)
+                                    {
+                                        $model = Mage::getModel('makingsense_doppler/defaultlist');
+                                        foreach ($model->getCollection() as $list) {
+                                            $model->load($list->getId())->delete();
+                                        }
+                                    }
+                                }
                             } else {
                                 $responseContent = json_decode($resp, true);
                                 $this->_getSession()->addError($this->__('The following errors occurred creating your list: ' . $responseContent['title']));
@@ -332,6 +362,29 @@ class MakingSense_Doppler_Adminhtml_ListsController extends Mage_Adminhtml_Contr
 
                             if ($statusCode == '201') {
                                 $this->_getSession()->addSuccess($this->__('The list has been successfully created'));
+
+                                // If the new list has been marked as default, then update default list in Magento
+                                if (isset($data['default_list']))
+                                {
+                                    $responseContent = json_decode($resp, true);
+                                    $createdListId = $responseContent['createdResourceId'];
+
+                                    $model = Mage::getModel('makingsense_doppler/defaultlist');
+
+                                    // Remove the old list information
+                                    foreach ($model->getCollection() as $list)
+                                    {
+                                        $model->load($list->getId())->delete();
+                                    }
+
+                                    $newDefaultList = array();
+
+                                    $newDefaultList['name'] = $data['name'];
+                                    $newDefaultList['listId'] = $createdListId;
+
+                                    $model->setData($newDefaultList);
+                                    $model->save();
+                                }
                             } else {
                                 $responseContent = json_decode($resp, true);
                                 $this->_getSession()->addError($this->__('The following errors occurred creating your list: ' . $responseContent['title']));

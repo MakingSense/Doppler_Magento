@@ -186,6 +186,8 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
                     }
 
                     $exportedSuccessfully = true;
+                } else {
+                    Mage::log($resp, null,'debug.log');
                 }
             }
 

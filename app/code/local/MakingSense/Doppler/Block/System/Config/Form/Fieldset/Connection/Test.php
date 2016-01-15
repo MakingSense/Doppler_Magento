@@ -66,8 +66,6 @@ class MakingSense_Doppler_Block_System_Config_Form_Fieldset_Connection_Test exte
 
                 // Close request to clear up some resources
                 curl_close($ch);
-            } else {
-                $block->setStatusCode('404');
             }
 
         }

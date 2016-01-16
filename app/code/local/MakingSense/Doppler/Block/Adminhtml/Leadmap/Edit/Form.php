@@ -71,13 +71,21 @@ class MakingSense_Doppler_Block_Adminhtml_Leadmap_Edit_Form extends Mage_Adminht
 	*/
 	public function getCustomerAttributes()
 	{
-		$attributes = Mage::getModel('customer/entity_attribute_collection')
-			->addVisibleFilter();
+		// Get customer attributes
+		$attributes = Mage::getModel('customer/customer')->getAttributes();
 		$result = array();
 		foreach ($attributes as $attribute) {
 			if (($label = $attribute->getName()))
 				$result[$label] = $label;
 		}
+
+		// Get customer address attributes
+		$customerAddressAttributes = Mage::getModel('customer/address')->getAttributes();
+		foreach ($customerAddressAttributes as $customerAddressAttribute) {
+			if (($label = $customerAddressAttribute->getName()))
+				$result[$label] = $label;
+		}
+
 		return $result;
 	}
 }

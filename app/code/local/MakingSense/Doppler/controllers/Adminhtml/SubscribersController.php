@@ -17,13 +17,6 @@ class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml
     protected $_leadMapping = null;
 
     /**
-     * Customer attributes from mapped fields
-     *
-     * @var null|array
-     */
-    protected $_customerAttributes = null;
-
-    /**
      * Set active menu
      */
     protected function initAction()

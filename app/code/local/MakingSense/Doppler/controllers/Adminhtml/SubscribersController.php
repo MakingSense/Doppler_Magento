@@ -9,12 +9,6 @@
 
 class MakingSense_Doppler_Adminhtml_SubscribersController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * Doppler lead mapping array
-     *
-     * @var null|array
-     */
-    protected $_leadMapping = null;
 
     /**
      * Set active menu

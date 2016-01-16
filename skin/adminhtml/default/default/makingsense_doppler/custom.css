@@ -25,3 +25,10 @@
 #makingsense_doppler_defaultlist_grid_table td.last {
     font-weight: bold;
 }
+
+#makingsense_doppler_defaultlist_grid_table td {
+    padding: 50px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+}

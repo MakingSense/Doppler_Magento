@@ -200,6 +200,8 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get all fields from Doppler
+     *
+     * @return array
      */
     public function getDopplerFields()
     {
@@ -251,6 +253,8 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get Doppler lists from API
+     *
+     * @return array
      */
     public function getDopplerLists()
     {
@@ -304,6 +308,8 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get default Doppler list from Magento
+     *
+     * @return int $defaultDopplerList
      */
     public function getDefaultDopplerList() {
         $defaultDopplerList = 0;
@@ -319,6 +325,27 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         return $defaultDopplerList;
+    }
+
+    /**
+     * Get default Doppler list status
+     *
+     * @return bool
+     */
+    public function isDefaultListEnabled() {
+        $defaultDopplerList = 0;
+        $defaultListCollection = Mage::getModel('makingsense_doppler/defaultlist')->getCollection();
+
+        foreach ($defaultListCollection->getData() as $defaultList)
+        {
+            $listStatus = $defaultList['list_status'];
+
+            if ($listStatus == self::DOPPLER_LIST_STATUS_ENABLED) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -54,6 +54,25 @@
         <?php else: ?>
         spanTags[i].parentElement.parentElement.style.backgroundImage= "url(<?php echo $this->getSkinUrl('makingsense_doppler/images/nav2_last_li_bg-green.png') ?>)";
         <?php endif ?>
+
+        // Find Default Doppler List menu item
+        searchText = '<?php echo $this->__('Default Doppler List') ?>';
+        found = false;
+        for (i = 0; i < spanTags.length; i++) {
+            if (spanTags[i].textContent == searchText) {
+                found = spanTags[i];
+                break;
+            }
+        }
+
+        spanTags[i].parentElement.style.backgroundColor = 'transparent';
+
+        // Apply red/green background color based on default Doppler list status
+        <?php if (!Mage::helper('makingsense_doppler')->isDefaultListEnabled()): ?>
+        spanTags[i].parentElement.parentElement.style.backgroundImage= "url(<?php echo $this->getSkinUrl('makingsense_doppler/images/nav2_last_li_bg-red.png') ?>)";
+        <?php else: ?>
+        spanTags[i].parentElement.parentElement.style.backgroundImage= "url(<?php echo $this->getSkinUrl('makingsense_doppler/images/nav2_last_li_bg-green.png') ?>)";
+        <?php endif ?>
     </script>
 
 </div>

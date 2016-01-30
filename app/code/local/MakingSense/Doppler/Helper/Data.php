@@ -78,12 +78,7 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
 
             if ($resp)
             {
-                $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                if ($statusCode == '200')
-                {
-                    $apiAvailable = true;
-                }
+                $apiAvailable = true;
             }
 
             // Close request to clear up some resources
@@ -155,17 +150,19 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
             $body = '{ "email": "' . $customer->getEmail() . '", ';
             $body .= ' "fields": [ ';
 
-            $mappedFieldsCount = count($this->_leadMapping);
-            $leadMappingArrayKeys = array_keys($this->_leadMapping);
-            $customerAttributesArrayKeys = array_keys($this->_customerAttributes);
+                $mappedFieldsCount = count($this->_leadMapping);
+                $leadMappingArrayKeys = array_keys($this->_leadMapping);
+                $customerAttributesArrayKeys = array_keys($this->_customerAttributes);
 
-            for ($i = 0; $i < $mappedFieldsCount; $i++) {
-                $fieldName = $leadMappingArrayKeys[$i];
-                $customerAttributeValue = $this->_customerAttributes[$customerAttributesArrayKeys[$i]];
-                $body .= '{ name: "' . $fieldName . '", value: "' . $customerAttributeValue . '" }, ';
-            }
+                for ($i = 0; $i < $mappedFieldsCount; $i++) {
+                    $fieldName = $leadMappingArrayKeys[$i];
+                    $customerAttributeValue = $this->_customerAttributes[$customerAttributesArrayKeys[$i]];
+                    $body .= '{ name: "' . $fieldName . '", value: "' . $customerAttributeValue . '" }, ';
+                }
 
             $body .= ']}';
+
+            Mage::log($body, null,'debug.log');
 
             // Set body
             curl_setopt($ch, CURLOPT_POST, 1);
@@ -241,6 +238,60 @@ class MakingSense_Doppler_Helper_Data extends Mage_Core_Helper_Abstract
                 {
                     $fieldName = $field['name'];
                     $this->_fieldsArray[$fieldName] = $fieldName;
+                }
+            }
+
+            // Close request to clear up some resources
+            curl_close($ch);
+        }
+
+        return $this->_fieldsArray;
+    }
+
+    /**
+     * Get all fields from Doppler with their data type
+     *
+     * @return array
+     */
+    public function getDopplerFieldsWithDataType()
+    {
+        $this->_fieldsArray = array();
+
+        $usernameValue = Mage::getStoreConfig('doppler/connection/username');
+        $apiKeyValue = Mage::getStoreConfig('doppler/connection/key');
+
+        if($usernameValue != '' && $apiKeyValue != '') {
+            // Get cURL resource
+            $ch = curl_init();
+
+            // Set url
+            curl_setopt($ch, CURLOPT_URL, 'https://restapi.fromdoppler.com/accounts/' . $usernameValue. '/fields');
+
+            // Set method
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+            // Set options
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            // Set headers
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    "Authorization: token " . $apiKeyValue,
+                ]
+            );
+
+            // Send the request & save response to $resp
+            $resp = curl_exec($ch);
+
+            if($resp)
+            {
+                $responseContent = json_decode($resp, true);
+                $fieldsResponseArray = $responseContent['items'];
+
+                foreach ($fieldsResponseArray as $field)
+                {
+                    $fieldName = $field['name'];
+                    $fieldDataType = $field['type'];
+                    $this->_fieldsArray[$fieldName] = $fieldDataType;
                 }
             }
 

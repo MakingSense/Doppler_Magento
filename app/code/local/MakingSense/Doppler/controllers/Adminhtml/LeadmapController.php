@@ -109,29 +109,27 @@ class MakingSense_Doppler_Adminhtml_LeadmapController extends Mage_Adminhtml_Con
 
         if ($data){
             try {
-                // Validate that there is no attribute already associated with this Doppler field
+                // 1- Validate that there is no attribute already associated with this Doppler field
                 $fieldAlreadyExist = false;
 
                 $mappedFields = Mage::getModel('makingsense_doppler/leadmap')->getCollection()->getData();
 
                 $savedDopplerFieldName = '';
 
-                foreach ($mappedFields as $field) {
+                foreach ($mappedFields as $field)
+                {
+                    $dopplerFieldName = $field['doppler_field_name'];
+                    $savedDopplerFieldName = $data['doppler_field_name'];
 
                     // If editing mapping
                     if (array_key_exists('id', $data)) {
                         if ($field['id'] != $data['id']) {
-                            $dopplerFieldName = $field['doppler_field_name'];
-                            $savedDopplerFieldName = $data['doppler_field_name'];
-
                             if ($dopplerFieldName == $savedDopplerFieldName) {
                                 $fieldAlreadyExist = true;
                             }
                         }
                     // If creating new mapping
                     } else {
-                        $dopplerFieldName = $field['doppler_field_name'];
-                        $savedDopplerFieldName = $data['doppler_field_name'];
 
                         if ($dopplerFieldName == $savedDopplerFieldName) {
                             $fieldAlreadyExist = true;

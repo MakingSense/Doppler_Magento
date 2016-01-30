@@ -33,7 +33,6 @@ $installer->addAttributeToGroup(
 );
 
 $oAttribute = Mage::getSingleton('eav/config')->getAttribute('customer', 'doppler_synced');
-$oAttribute->setData('used_in_forms', array('adminhtml_customer','customer_account_create'));
 $oAttribute->save();
 
 $installer->endSetup();

@@ -119,8 +119,7 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends Mage_Adminhtm
 			'header'    => Mage::helper('customer')->__('ID'),
 			'width'     => '50px',
 			'index'     => 'entity_id',
-			'type'  	=> 'number',
-			'filter'	=> false
+			'type'  	=> 'number'
 		));
 
 		$this->addColumn('name', array(
@@ -177,8 +176,7 @@ class MakingSense_Doppler_Block_Adminhtml_Subscribers_Grid extends Mage_Adminhtm
 			'align'		=> 'center',
 			'type'		=> 'options',
 			'width'     => '80px',
-			'filter'     => false,
-			'options' 	=>  array('1' => 'Yes', '0' => 'No', '' => 'No'),
+			'options' 	=>  array(1 => 'Yes', '' => 'No'),
 			'column_css_class' => 'doppler-highlighted'
 		),'website');
 
